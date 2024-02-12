@@ -31,6 +31,9 @@ add_executable(pmpp_cuda main.cpp
         cuda/vec_add_cuda_test.cpp
         cpp/eigen_utils.h
         cpp/eigen_utils_test.cpp
+        cuda/mat_mul.cuh
+        cuda/mat_mul.cu
+        cuda/mat_mul_cuda_test.cpp
 )
 target_link_libraries(pmpp_cuda GTest::gtest_main)
 target_include_directories(pmpp_cuda PRIVATE ${EIGEN3_INCLUDE_DIR})
