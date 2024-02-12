@@ -41,4 +41,5 @@ cmake-build-release
 cmake-build-release-coverage
 cmake-build-debug-coverage
 thirdparty
+build
 
