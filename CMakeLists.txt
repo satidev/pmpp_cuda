@@ -20,42 +20,6 @@ set(gtest_force_shared_crt ON CACHE BOOL "" FORCE)
 FetchContent_MakeAvailable(googletest)
 
 set(EIGEN3_INCLUDE_DIR "${CMAKE_CURRENT_SOURCE_DIR}/thirdparty")
-
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} \
-    -Wall \
-    -Wextra \
-    -Werror \
-    -Wpedantic \
-    -Wconversion \
-    -Wdeprecated-declarations \
-    -Wformat \
-    -Wfloat-equal \
-    -Wshadow \
-    -Wuninitialized \
-    -Wunused \
-    -Wmissing-declarations \
-    -Wmissing-include-dirs \
-    -Wcast-align \
-    -Wredundant-decls \
-    -Wlogical-op \
-    -Wnull-dereference \
-    -Wreturn-type \
-    -Wsign-conversion \
-    -Warith-conversion \
-    -Walloc-zero \
-    -Wclass-memaccess \
-    -Wdouble-promotion \
-    -Wduplicated-branches \
-    -Wnon-virtual-dtor \
-    -Wnull-dereference \
-    -Wold-style-cast \
-    -Wunreachable-code")
-
-
-# Exclude third party files from compiler warnings.
-set(CMAKE_CXX_FLAGS -isystem"${EIGEN3_INCLUDE_DIR}")
-
-
 enable_testing()
 add_executable(pmpp_cuda main.cpp
         cpp/vec_add.h
@@ -69,6 +33,10 @@ add_executable(pmpp_cuda main.cpp
         cuda/mat_mul.cuh
         cuda/mat_mul.cu
         cuda/mat_mul_cuda_test.cpp
+)
+set_target_properties(pmpp_cuda PROPERTIES CUDA_SEPARABLE_COMPILATION OFF)
+target_compile_options(pmpp_cuda PRIVATE $<$<COMPILE_LANGUAGE:CUDA>:
+        --expt-extended-lambda --expt-relaxed-constexpr -ftemplate-backtrace-limit=0 >
 )
 target_link_libraries(pmpp_cuda GTest::gtest_main)
 target_include_directories(pmpp_cuda PRIVATE ${EIGEN3_INCLUDE_DIR})
