@@ -21,6 +21,41 @@ FetchContent_MakeAvailable(googletest)
 
 set(EIGEN3_INCLUDE_DIR "${CMAKE_CURRENT_SOURCE_DIR}/thirdparty")
 
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} \
+    -Wall \
+    -Wextra \
+    -Werror \
+    -Wpedantic \
+    -Wconversion \
+    -Wdeprecated-declarations \
+    -Wformat \
+    -Wfloat-equal \
+    -Wshadow \
+    -Wuninitialized \
+    -Wunused \
+    -Wmissing-declarations \
+    -Wmissing-include-dirs \
+    -Wcast-align \
+    -Wredundant-decls \
+    -Wlogical-op \
+    -Wnull-dereference \
+    -Wreturn-type \
+    -Wsign-conversion \
+    -Warith-conversion \
+    -Walloc-zero \
+    -Wclass-memaccess \
+    -Wdouble-promotion \
+    -Wduplicated-branches \
+    -Wnon-virtual-dtor \
+    -Wnull-dereference \
+    -Wold-style-cast \
+    -Wunreachable-code")
+
+
+# Exclude third party files from compiler warnings.
+set(CMAKE_CXX_FLAGS -isystem"${EIGEN3_INCLUDE_DIR}")
+
+
 enable_testing()
 add_executable(pmpp_cuda main.cpp
         cpp/vec_add.h
