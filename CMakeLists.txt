@@ -8,7 +8,6 @@ if (UNIX)
     set(CMAKE_CUDA_COMPILER "/usr/local/cuda-12.1/bin/nvcc")
 endif ()
 
-
 project(pmpp_cuda CXX CUDA)
 set(CMAKE_CXX_STANDARD 17)
 include(FetchContent)
@@ -20,6 +19,8 @@ FetchContent_Declare(
 set(gtest_force_shared_crt ON CACHE BOOL "" FORCE)
 FetchContent_MakeAvailable(googletest)
 
+set(EIGEN3_INCLUDE_DIR "${CMAKE_CURRENT_SOURCE_DIR}/thirdparty")
+
 enable_testing()
 add_executable(pmpp_cuda main.cpp
         cpp/vec_add.h
@@ -28,8 +29,10 @@ add_executable(pmpp_cuda main.cpp
         cuda/vec_add.cu
         cuda/vec_add.cuh
         cuda/vec_add_cuda_test.cpp
+        cpp/eigen_utils.h
+        cpp/eigen_utils_test.cpp
 )
 target_link_libraries(pmpp_cuda GTest::gtest_main)
-
+target_include_directories(pmpp_cuda PRIVATE ${EIGEN3_INCLUDE_DIR})
 include(GoogleTest)
 gtest_discover_tests(pmpp_cuda)
