@@ -1,25 +1,13 @@
 #include <gmock/gmock.h>
 #include "mat_mul.cuh"
-
-TEST(cudaMatMulTest, noThrowsDueToSquareMat)
-{
-    auto const a = Eigen::Matrix2f();
-    ASSERT_NO_THROW(Numeric::CUDA::matMul(a, a));
-}
-
-
-TEST(cudaMatMulTest, throwsDueToNonSquareMat)
-{
-    auto const a = Eigen::Matrix2f();
-    auto const b = Eigen::MatrixXf(2, 3);
-    ASSERT_THROW(Numeric::CUDA::matMul(a, b), std::invalid_argument);
-    ASSERT_THROW(Numeric::CUDA::matMul(b, a), std::invalid_argument);
-}
+#include <iostream>
 
 TEST(cudaMatMulTest, noThrowDueToValidSizeForMatrixMult)
 {
-    auto const a = Eigen::Matrix2f();
-    ASSERT_NO_THROW(Numeric::CUDA::matMul(a, a));
+    auto const a = Eigen::MatrixXf(2, 3);
+    auto const b = Eigen::MatrixXf(3, 4);
+    ASSERT_NO_THROW(Numeric::CUDA::matMul(a, b));
+    ASSERT_NO_THROW(Numeric::CUDA::matMul(Eigen::Matrix2f(), Eigen::Matrix2f()));
 }
 
 TEST(cudaMatMulTest, ThrowDueToInvalidSizeForMatrixMult)
@@ -32,21 +20,36 @@ TEST(cudaMatMulTest, ThrowDueToInvalidSizeForMatrixMult)
 
 TEST(cudaMatMulTest, squareMatMulTest)
 {
-    auto a = Eigen::Matrix2f();
-    a << 1.0f, 1.0f, 1.0f, 1.0f;
-    auto b = Eigen::Matrix2f();
-    b << 1.0f, 1.0f, 1.0f, 1.0f;
-
-    auto const exp_res = Numeric::CUDA::matMul(a, b);
-    auto const res = a * b;
-    ASSERT_THAT(EigenUtils::toVec(exp_res), testing::ContainerEq(EigenUtils::toVec<float>(res)));
+    auto const a = Eigen::MatrixXf::Constant(2u, 2u, 1.0f);
+    auto const b = Eigen::MatrixXf::Constant(2u, 2u, 1.0f);
+    auto const res = Numeric::CUDA::matMul(a, b);
+    auto const exp_res = a * b;
+    ASSERT_THAT(EigenUtils::toVec(res), testing::ContainerEq(EigenUtils::toVec<float>(exp_res)));
 }
 
-TEST(cudaMatMulTest, largeSquareMatMulTest)
+TEST(cudaMatMulTest, validResMatrixSizeTest)
 {
-    auto a = Eigen::MatrixXf::Constant(313u, 313u, -1.0f);
-    auto b = Eigen::MatrixXf::Constant(313u, 313u, 3.0f);
-    auto const exp_res = Numeric::CUDA::matMul(a, b);
-    auto const res = a * b;
-    ASSERT_THAT(EigenUtils::toVec(exp_res), testing::ContainerEq(EigenUtils::toVec<float>(res)));
+    auto const a = Eigen::MatrixXf::Constant(112, 234, -1.0f);
+    auto const b = Eigen::MatrixXf::Constant(234, 118, 3.0f);
+    auto const res = Numeric::CUDA::matMul(a, b);
+    ASSERT_EQ(res.rows(), a.rows());
+    ASSERT_EQ(res.cols(), b.cols());
+}
+
+TEST(cudaMatMulTest, genMatrixMultTest)
+{
+    auto const a = Eigen::MatrixXf::Constant(115u, 21u, 1.0f);
+    auto const b = Eigen::MatrixXf::Constant(21u, 314u, 1.0f);
+    auto const res = Numeric::CUDA::matMul(a, b);
+    auto const exp_res = a * b;
+    ASSERT_THAT(EigenUtils::toVec(res), testing::ContainerEq(EigenUtils::toVec<float>(exp_res)));
+}
+
+TEST(cudaMatMulSharedMemTest, largeSquareMatMulTest)
+{
+    auto const a = Eigen::MatrixXf::Constant(313u, 313u, 1.0f);
+    auto const b = Eigen::MatrixXf::Constant(313u, 313u, 1.0f);
+    auto const res = Numeric::CUDA::matMulSharedMem(a, b);
+    auto const exp_res = a * b;
+    ASSERT_THAT(EigenUtils::toVec(res), testing::ContainerEq(EigenUtils::toVec<float>(exp_res)));
 }
