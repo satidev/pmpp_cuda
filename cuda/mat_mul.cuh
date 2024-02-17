@@ -6,9 +6,9 @@
 
 namespace Numeric::CUDA
 {
-Eigen::MatrixXf matMul(Eigen::MatrixXf const &a, Eigen::MatrixXf const &b);
-Eigen::MatrixXf matMulSharedMem(Eigen::MatrixXf const &a,
-                                Eigen::MatrixXf const &b);
+Eigen::MatrixXf matMul(Eigen::MatrixXf const &a,
+                       Eigen::MatrixXf const &b,
+                       bool use_shared_mem = false);
 }// Numeric namespace.
 
 #endif //MAT_MUL_CUH
