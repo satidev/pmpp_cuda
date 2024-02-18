@@ -1,4 +1,5 @@
 #include "mat_mul.cuh"
+#include "dev_config.cuh"
 
 namespace Numeric::CUDA
 {
@@ -18,48 +19,51 @@ __global__ void mat_mul(float *a, float *b, float *res,
     }
 }
 
-auto constexpr TILE_WIDTH = 32u;
-
 __global__ void mat_mul_shared_mem(float *a, float *b, float *res,
                                    unsigned num_rows_a, unsigned num_cols_a,
                                    unsigned num_cols_b)
 {
-    auto const row = blockIdx.y * TILE_WIDTH + threadIdx.y;
-    auto const col = blockIdx.x * TILE_WIDTH + threadIdx.x;
+    // It is assumed that blockDim.x == blockDim.y.
+    auto const tile_width = blockDim.x;
+    auto const row = blockIdx.y * tile_width + threadIdx.y;
+    auto const col = blockIdx.x * tile_width + threadIdx.x;
 
-    __shared__ float a_tile[TILE_WIDTH][TILE_WIDTH];
-    __shared__ float b_tile[TILE_WIDTH][TILE_WIDTH];
+    extern __shared__ float shared_mem[];
+    auto a_tile = reinterpret_cast<float *>(shared_mem);
+    auto b_tile = reinterpret_cast<float *>(shared_mem + tile_width * tile_width);
 
     auto const num_rows_b = num_cols_a;
     auto const num_tiles = static_cast<unsigned>(
-        ceil(static_cast<float>(max(num_rows_a, num_cols_b)) / TILE_WIDTH));
+        ceil(static_cast<float>(max(num_rows_a, num_cols_b)) /
+            static_cast<float>(tile_width)));
     for (auto tile_idx = 0u; tile_idx < num_tiles; tile_idx++) {
 
         // Load the tiles into shared memory.
         auto const a_row = row;
         auto const b_col = col;
-        auto const a_col = tile_idx * TILE_WIDTH + threadIdx.x;
-        auto const b_row = tile_idx * TILE_WIDTH + threadIdx.y;
+        auto const a_col = tile_idx * tile_width + threadIdx.x;
+        auto const b_row = tile_idx * tile_width + threadIdx.y;
 
         if (a_row < num_rows_a && a_col < num_cols_a) {
-            a_tile[threadIdx.y][threadIdx.x] = a[a_row * num_cols_a + a_col];
+            a_tile[threadIdx.y * tile_width + threadIdx.x] = a[a_row * num_cols_a + a_col];
         }
         else {
-            a_tile[threadIdx.y][threadIdx.x] = 0.0f;
+            a_tile[threadIdx.y * tile_width + threadIdx.x] = 0.0f;
         }
         if (b_row < num_rows_b && b_col < num_cols_b) {
-            b_tile[threadIdx.y][threadIdx.x] = b[b_row * num_cols_b + b_col];
+            b_tile[threadIdx.y * tile_width + threadIdx.x] = b[b_row * num_cols_b + b_col];
         }
         else {
-            b_tile[threadIdx.y][threadIdx.x] = 0.0f;
+            b_tile[threadIdx.y * tile_width + threadIdx.x] = 0.0f;
         }
 
         __syncthreads();
 
         // Compute the result for the tiles.
         auto res_elem_val = 0.0f;
-        for (auto idx = 0u; idx < TILE_WIDTH; idx++) {
-            res_elem_val += (a_tile[threadIdx.y][idx] * b_tile[idx][threadIdx.x]);
+        for (auto idx = 0u; idx < tile_width; idx++) {
+            res_elem_val += (a_tile[threadIdx.y * tile_width + idx]
+                * b_tile[idx * tile_width + threadIdx.x]);
         }
 
         // Store the result in the global memory.
@@ -83,6 +87,14 @@ Eigen::MatrixXf matMul(Eigen::MatrixXf const &a,
     auto const b_vec = EigenUtils::toVec(b);
     auto res_vec = std::vector<float>(a.rows() * b.cols(), -1.0f);
 
+    // Check the device has enough global memory to store all vectors.
+    auto const &dev_config = DeviceConfigSingleton::getInstance();
+    if ((a_vec.size() + b_vec.size() + res_vec.size()) * sizeof(float) >
+        dev_config.getDevProps(0).global_mem_size) {
+        throw std::runtime_error{"Insufficient global memory on the device."};
+    }
+
+
     // Allocate device GPU memory.
     auto a_vec_dev = static_cast<float *>(nullptr);
     auto b_vec_dev = static_cast<float *>(nullptr);
@@ -96,7 +108,9 @@ Eigen::MatrixXf matMul(Eigen::MatrixXf const &a,
     cudaMemcpy(b_vec_dev, b_vec.data(), b_vec.size() * sizeof(float), cudaMemcpyHostToDevice);
 
     // Execute the kernel.
-    auto const num_threads_per_block = dim3{TILE_WIDTH, TILE_WIDTH};
+    auto const shared_mem_per_blk = dev_config.getDevProps(0).max_shared_mem_per_block;
+
+    auto constexpr num_threads_per_block = dim3{16u, 16u};
     auto const num_blocks_x = static_cast<unsigned>(
         std::ceil(static_cast<float>(b.cols()) /
             static_cast<float>(num_threads_per_block.x)));
@@ -104,13 +118,21 @@ Eigen::MatrixXf matMul(Eigen::MatrixXf const &a,
         std::ceil(static_cast<float>(a.rows()) /
             static_cast<float>(num_threads_per_block.y)));
     auto const num_blocks = dim3{num_blocks_x, num_blocks_y};
+
     if (use_shared_mem) {
-        mat_mul_shared_mem<<<num_blocks, num_threads_per_block>>>(a_vec_dev,
-                                                                  b_vec_dev,
-                                                                  res_vec_dev,
-                                                                  static_cast<unsigned>(a.rows()),
-                                                                  static_cast<unsigned>(a.cols()),
-                                                                  static_cast<unsigned>(b.cols()));
+        if(num_threads_per_block.x != num_threads_per_block.y) {
+            throw std::invalid_argument{"The number of threads per block in each dimension must be equal."};
+        }
+        auto constexpr tile_width = num_threads_per_block.x;
+        auto constexpr shared_mem_size = 2 * tile_width * tile_width * sizeof(float);
+        if (shared_mem_size > shared_mem_per_blk) {
+            throw std::runtime_error{"Shared memory size exceeds the limit."};
+        }
+        mat_mul_shared_mem<<<num_blocks, num_threads_per_block, shared_mem_size>>>(
+            a_vec_dev, b_vec_dev, res_vec_dev,
+            static_cast<unsigned>(a.rows()),
+            static_cast<unsigned>(a.cols()),
+            static_cast<unsigned>(b.cols()));
     }
     else {
         mat_mul<<<num_blocks, num_threads_per_block>>>(a_vec_dev,
