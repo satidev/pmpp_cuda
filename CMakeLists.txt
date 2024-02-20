@@ -35,6 +35,8 @@ add_executable(pmpp_cuda main.cpp
         cuda/mat_mul_cuda_test.cpp
         cuda/dev_config.cuh
         cuda/dev_config.cu
+        cpp/host_timer.h
+        cpp/host_timer.cpp
 )
 set_target_properties(pmpp_cuda PROPERTIES CUDA_SEPARABLE_COMPILATION OFF)
 target_compile_options(pmpp_cuda PRIVATE $<$<COMPILE_LANGUAGE:CUDA>:

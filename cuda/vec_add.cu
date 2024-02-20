@@ -43,7 +43,7 @@ std::vector<float> vecAdd(std::vector<float> const &first_host,
     // Transfer result data from the device to host.
     cudaMemcpy(res_host.data(), res_dev, vec_size_bytes, cudaMemcpyDeviceToHost);
 
-    // Clean-up device memory.
+    // Cleanup device memory.
     cudaFree(first_dev);
     cudaFree(sec_dev);
     cudaFree(res_dev);
