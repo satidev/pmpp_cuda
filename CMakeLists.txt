@@ -1,8 +1,8 @@
 cmake_minimum_required(VERSION 3.25)
 
-if(NOT DEFINED $ENV{CUDAARCHS})
+if (NOT DEFINED $ENV{CUDAARCHS})
     set(CMAKE_CUDA_ARCHITECTURES 60 61 62 70 72 75 86)
-endif()
+endif ()
 
 if (UNIX)
     set(CMAKE_CUDA_COMPILER "/usr/local/cuda-12.1/bin/nvcc")
@@ -21,28 +21,44 @@ FetchContent_MakeAvailable(googletest)
 
 set(EIGEN3_INCLUDE_DIR "${CMAKE_CURRENT_SOURCE_DIR}/thirdparty")
 enable_testing()
-add_executable(pmpp_cuda main.cpp
+
+add_library(pmpp_cuda_lib
         cpp/vec_add.h
         cpp/vec_add.cpp
-        cpp/vec_add_test.cpp
         cuda/vec_add.cu
         cuda/vec_add.cuh
-        cuda/vec_add_cuda_test.cpp
         cpp/eigen_utils.h
-        cpp/eigen_utils_test.cpp
         cuda/mat_mul.cuh
         cuda/mat_mul.cu
-        cuda/mat_mul_cuda_test.cpp
         cuda/dev_config.cuh
         cuda/dev_config.cu
         cpp/host_timer.h
-        cpp/host_timer.cpp
-)
+        cpp/host_timer.cpp)
+target_include_directories(pmpp_cuda_lib PRIVATE ${EIGEN3_INCLUDE_DIR})
+
+add_executable(pmpp_cuda main.cu)
 set_target_properties(pmpp_cuda PROPERTIES CUDA_SEPARABLE_COMPILATION OFF)
 target_compile_options(pmpp_cuda PRIVATE $<$<COMPILE_LANGUAGE:CUDA>:
+        --generate-line-info
+        --expt-extended-lambda
+        --expt-relaxed-constexpr
+        -ftemplate-backtrace-limit=0 >)
+target_link_libraries(pmpp_cuda pmpp_cuda_lib)
+target_include_directories(pmpp_cuda PRIVATE ${EIGEN3_INCLUDE_DIR})
+
+
+add_executable(pmpp_cuda_test main_test.cpp
+        cpp/vec_add_test.cpp
+        cuda/vec_add_cuda_test.cpp
+        cpp/eigen_utils_test.cpp
+        cuda/mat_mul_cuda_test.cpp
+)
+set_target_properties(pmpp_cuda_test PROPERTIES CUDA_SEPARABLE_COMPILATION OFF)
+target_compile_options(pmpp_cuda_test PRIVATE $<$<COMPILE_LANGUAGE:CUDA>:
         --expt-extended-lambda --expt-relaxed-constexpr -ftemplate-backtrace-limit=0 >
 )
-target_link_libraries(pmpp_cuda GTest::gtest_main)
-target_include_directories(pmpp_cuda PRIVATE ${EIGEN3_INCLUDE_DIR})
+target_link_libraries(pmpp_cuda_test pmpp_cuda_lib)
+target_link_libraries(pmpp_cuda_test GTest::gtest_main)
+target_include_directories(pmpp_cuda_test PRIVATE ${EIGEN3_INCLUDE_DIR})
 include(GoogleTest)
-gtest_discover_tests(pmpp_cuda)
+gtest_discover_tests(pmpp_cuda_test)
