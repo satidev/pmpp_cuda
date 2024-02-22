@@ -17,6 +17,7 @@ struct DeviceProperties
     size_t max_regs_per_sm;
     size_t max_threads_per_warp;
     size_t max_blocks_per_sm;
+    size_t warp_size;
 };
 
 class DeviceConfigSingleton
