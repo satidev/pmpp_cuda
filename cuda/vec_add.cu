@@ -1,10 +1,18 @@
 #include "vec_add.cuh"
+#include "exec_config.cuh"
 #include <stdexcept>
 
 namespace Numeric::CUDA
 {
-__global__ void vec_add_kernels(float *first, float *sec, float *res,
-                                unsigned num_elems)
+__global__ void vec_add_kern(float const *first,
+                             float const *sec,
+                             float *res,
+                             unsigned num_elems);
+
+__global__ void vec_add_kern(float const *first,
+                             float const *sec,
+                             float *res,
+                             unsigned num_elems)
 {
     auto const idx = blockIdx.x * blockDim.x + threadIdx.x;
     if (idx < num_elems) {
@@ -35,9 +43,9 @@ std::vector<float> vecAdd(std::vector<float> const &first_host,
     cudaMemcpy(sec_dev, sec_host.data(), vec_size_bytes, cudaMemcpyHostToDevice);
 
     // Execute the kernel.
-    auto const num_threads_per_block = 32u;
-    auto const num_blocks = std::ceil(static_cast<float>(first_host.size())/num_threads_per_block);
-    vec_add_kernels<<<num_blocks, num_threads_per_block>>>(
+    auto const exec_params = ExecConfig::getParams(first_host.size(),
+                                                   vec_add_kern, 0u);
+    vec_add_kern<<<exec_params.grid_dim, exec_params.block_dim>>>(
         first_dev, sec_dev, res_dev, static_cast<unsigned >(first_host.size()));
 
     // Transfer result data from the device to host.
