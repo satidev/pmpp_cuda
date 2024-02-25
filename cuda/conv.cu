@@ -24,7 +24,7 @@ __global__ void conv_kern_1d(float const *data,
         auto sum = 0.0f;
         for (auto i = 0u; i < filter_size; ++i) {
             auto const data_idx = idx + (filter_radius - i);
-            if ((data_idx >= 0u) && (data_idx < num_elems)) {
+            if (data_idx < num_elems) {
                 sum += data[data_idx] * filter[i];
             }
         }
@@ -48,7 +48,7 @@ __global__ void conv_kern_1d_const_mem(float const *data,
         auto sum = 0.0f;
         for (auto i = 0u; i < filter_size; ++i) {
             auto const data_idx = idx + (filter_radius - i);
-            if ((data_idx >= 0u) && (data_idx < num_elems)) {
+            if (data_idx < num_elems) {
                 sum += data[data_idx] * FILTER_CONST[i];
             }
         }
