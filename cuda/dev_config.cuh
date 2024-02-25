@@ -44,12 +44,12 @@ public:
         return num_dev_;
     }
 
-    [[nodiscard]] DeviceProperties const &getDevProps(unsigned dev_id) const
+    [[nodiscard]] DeviceProperties const &getDevProps(unsigned dev_id = 0u) const
     {
         return dev_props_[dev_id];
     }
 
-    void printDeviceProperties(unsigned dev_id) const;
+    void printDeviceProperties(unsigned dev_id = 0u) const;
 
 private:
     DeviceConfigSingleton();

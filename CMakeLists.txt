@@ -20,8 +20,9 @@ set(gtest_force_shared_crt ON CACHE BOOL "" FORCE)
 FetchContent_MakeAvailable(googletest)
 
 set(EIGEN3_INCLUDE_DIR "${CMAKE_CURRENT_SOURCE_DIR}/thirdparty")
+set(IPP_INCLUDE_DIR "/home/shiras/intel/oneapi/ipp/2021.10/include/ipp")
+link_directories("/home/shiras/intel/oneapi/ipp/2021.10/lib/intel64")
 enable_testing()
-
 add_library(pmpp_cuda_lib
         cpp/vec_add.h
         cpp/vec_add.cpp
@@ -33,8 +34,14 @@ add_library(pmpp_cuda_lib
         cuda/dev_config.cuh
         cuda/dev_config.cu
         cpp/host_timer.h
-        cpp/host_timer.cpp)
+        cpp/host_timer.cpp
+        cuda/exec_config.cuh
+        cuda/conv.cuh
+        cuda/conv.cu
+)
 target_include_directories(pmpp_cuda_lib PRIVATE ${EIGEN3_INCLUDE_DIR})
+target_include_directories(pmpp_cuda_lib PRIVATE ${IPP_INCLUDE_DIR})
+target_link_libraries(pmpp_cuda_lib ippcore)
 
 add_executable(pmpp_cuda main.cu)
 set_target_properties(pmpp_cuda PROPERTIES CUDA_SEPARABLE_COMPILATION OFF)
@@ -45,13 +52,15 @@ target_compile_options(pmpp_cuda PRIVATE $<$<COMPILE_LANGUAGE:CUDA>:
         -ftemplate-backtrace-limit=0 >)
 target_link_libraries(pmpp_cuda pmpp_cuda_lib)
 target_include_directories(pmpp_cuda PRIVATE ${EIGEN3_INCLUDE_DIR})
-
+target_include_directories(pmpp_cuda PRIVATE ${IPP_INCLUDE_DIR})
+target_link_libraries(pmpp_cuda ippcore)
 
 add_executable(pmpp_cuda_test main_test.cpp
         cpp/vec_add_test.cpp
         cuda/vec_add_cuda_test.cpp
         cpp/eigen_utils_test.cpp
         cuda/mat_mul_cuda_test.cpp
+        cuda/conv_test.cpp
 )
 set_target_properties(pmpp_cuda_test PROPERTIES CUDA_SEPARABLE_COMPILATION OFF)
 target_compile_options(pmpp_cuda_test PRIVATE $<$<COMPILE_LANGUAGE:CUDA>:
@@ -62,3 +71,5 @@ target_link_libraries(pmpp_cuda_test GTest::gtest_main)
 target_include_directories(pmpp_cuda_test PRIVATE ${EIGEN3_INCLUDE_DIR})
 include(GoogleTest)
 gtest_discover_tests(pmpp_cuda_test)
+target_include_directories(pmpp_cuda_test PRIVATE ${IPP_INCLUDE_DIR})
+target_link_libraries(pmpp_cuda_test ippcore)
