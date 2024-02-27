@@ -7,7 +7,8 @@ namespace Numeric::CUDA
 {
 std::vector<float> conv1D(std::vector<float> const &data,
                           std::vector<float> const &filter,
-                          bool use_const_mem = false);
+                          bool use_const_mem = false,
+                          bool use_shared_mem = false);
 
 } // Numeric::CUDA namespace.
 
