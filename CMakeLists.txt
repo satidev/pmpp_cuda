@@ -38,6 +38,8 @@ add_library(pmpp_cuda_lib
         cuda/exec_config.cuh
         cuda/conv.cuh
         cuda/conv.cu
+        cuda/check_error.cuh
+        cuda/check_error.cu
 )
 target_include_directories(pmpp_cuda_lib PRIVATE ${EIGEN3_INCLUDE_DIR})
 target_include_directories(pmpp_cuda_lib PRIVATE ${IPP_INCLUDE_DIR})
