@@ -3,7 +3,7 @@
 
 namespace Numeric::CUDA
 {
-__global__ void mat_mul(float *a, float *b, float *res,
+__global__ void mat_mul(float const *a, float const *b, float *res,
                         unsigned num_rows_a, unsigned num_cols_a,
                         unsigned num_cols_b)
 {
@@ -19,7 +19,7 @@ __global__ void mat_mul(float *a, float *b, float *res,
     }
 }
 
-__global__ void mat_mul_shared_mem(float *a, float *b, float *res,
+__global__ void mat_mul_shared_mem(float const *a, float const *b, float *res,
                                    unsigned num_rows_a, unsigned num_cols_a,
                                    unsigned num_cols_b)
 {
