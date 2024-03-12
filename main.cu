@@ -4,14 +4,15 @@
 #include "cuda/dev_config.cuh"
 #include "cuda/exec_config.cuh"
 #include "../cpp/host_timer.h"
+#include "../cuda/stencil_1d.cuh"
 
 int main()
 {
     try {
-        auto constexpr num_elems = 1024u*1024u*2u;
-        auto const vec_1 = std::vector(num_elems, 1.0f);
-        auto const vec_2 = std::vector(num_elems, 2.0f);
-        auto const res = Numeric::CUDA::vecAdd(vec_1, vec_2, true);
+        auto const vec = std::vector<float>{1.0f, 2.0f, 3.0f};
+        auto const diff_vec = Numeric::CUDA::diff(vec);
+        for(auto const& elem:diff_vec)
+            std::cout << elem << std::endl;
     }
     catch (std::exception const &e) {
         std::cout << "Exception is thrown." << std::endl;

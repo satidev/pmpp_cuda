@@ -42,6 +42,8 @@ add_library(pmpp_cuda_lib
         cuda/check_error.cu
         cuda/timer.cuh
         cuda/timer.cu
+        cuda/stencil_1d.cuh
+        cuda/stencil_1d.cu
 )
 target_include_directories(pmpp_cuda_lib PRIVATE ${EIGEN3_INCLUDE_DIR})
 target_include_directories(pmpp_cuda_lib PRIVATE ${IPP_INCLUDE_DIR})
@@ -65,6 +67,7 @@ add_executable(pmpp_cuda_test main_test.cpp
         cpp/eigen_utils_test.cpp
         cuda/mat_mul_cuda_test.cpp
         cuda/conv_test.cpp
+        cuda/stencil_1d_test.cpp
 )
 set_target_properties(pmpp_cuda_test PROPERTIES CUDA_SEPARABLE_COMPILATION OFF)
 target_compile_options(pmpp_cuda_test PRIVATE $<$<COMPILE_LANGUAGE:CUDA>:
