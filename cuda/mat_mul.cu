@@ -110,37 +110,33 @@ Eigen::MatrixXf matMul(Eigen::MatrixXf const &a,
     // Execute the kernel.
     auto const shared_mem_per_blk = dev_config.getDevProps(0).max_shared_mem_per_block;
 
-    auto constexpr num_threads_per_block = dim3{16u, 16u};
-    auto const num_blocks_x = static_cast<unsigned>(
-        std::ceil(static_cast<float>(b.cols()) /
-            static_cast<float>(num_threads_per_block.x)));
-    auto const num_blocks_y = static_cast<unsigned>(
-        std::ceil(static_cast<float>(a.rows()) /
-            static_cast<float>(num_threads_per_block.y)));
-    auto const num_blocks = dim3{num_blocks_x, num_blocks_y};
+    auto constexpr block_size = dim3{16u, 16u};
+    auto const num_block_x = (static_cast<unsigned>(b.cols()) + block_size.x - 1u) / block_size.x;
+    auto const num_block_y = (static_cast<unsigned>(a.rows()) + block_size.y - 1u) / block_size.y;
+    auto const grid_size = dim3{num_block_x, num_block_y};
 
     if (use_shared_mem) {
-        if(num_threads_per_block.x != num_threads_per_block.y) {
+        if(block_size.x != block_size.y) {
             throw std::invalid_argument{"The number of threads per block in each dimension must be equal."};
         }
-        auto constexpr tile_width = num_threads_per_block.x;
+        auto constexpr tile_width = block_size.x;
         auto constexpr shared_mem_size = 2 * tile_width * tile_width * sizeof(float);
         if (shared_mem_size > shared_mem_per_blk) {
             throw std::runtime_error{"Shared memory size exceeds the limit."};
         }
-        mat_mul_shared_mem<<<num_blocks, num_threads_per_block, shared_mem_size>>>(
+        mat_mul_shared_mem<<<grid_size, block_size, shared_mem_size>>>(
             a_vec_dev, b_vec_dev, res_vec_dev,
             static_cast<unsigned>(a.rows()),
             static_cast<unsigned>(a.cols()),
             static_cast<unsigned>(b.cols()));
     }
     else {
-        mat_mul<<<num_blocks, num_threads_per_block>>>(a_vec_dev,
-                                                       b_vec_dev,
-                                                       res_vec_dev,
-                                                       static_cast<unsigned>(a.rows()),
-                                                       static_cast<unsigned>(a.cols()),
-                                                       static_cast<unsigned>(b.cols()));
+        mat_mul<<<grid_size, block_size>>>(a_vec_dev,
+                                           b_vec_dev,
+                                           res_vec_dev,
+                                           static_cast<unsigned>(a.rows()),
+                                           static_cast<unsigned>(a.cols()),
+                                           static_cast<unsigned>(b.cols()));
     }
     cudaMemcpy(res_vec.data(), res_vec_dev, res_vec.size() * sizeof(float), cudaMemcpyDeviceToHost);
 
