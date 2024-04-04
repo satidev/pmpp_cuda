@@ -19,6 +19,7 @@ FetchContent_Declare(
 set(gtest_force_shared_crt ON CACHE BOOL "" FORCE)
 FetchContent_MakeAvailable(googletest)
 
+
 set(EIGEN3_INCLUDE_DIR "${CMAKE_CURRENT_SOURCE_DIR}/thirdparty")
 enable_testing()
 add_library(pmpp_cuda_lib
@@ -73,7 +74,7 @@ target_compile_options(pmpp_cuda_test PRIVATE $<$<COMPILE_LANGUAGE:CUDA>:
         --expt-extended-lambda --expt-relaxed-constexpr -ftemplate-backtrace-limit=0 >
 )
 target_link_libraries(pmpp_cuda_test pmpp_cuda_lib)
-target_link_libraries(pmpp_cuda_test GTest::gtest_main)
+target_link_libraries(pmpp_cuda_test GTest::gtest_main GTest::gmock_main)
 target_include_directories(pmpp_cuda_test PRIVATE ${EIGEN3_INCLUDE_DIR})
 include(GoogleTest)
 gtest_discover_tests(pmpp_cuda_test)
