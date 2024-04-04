@@ -45,6 +45,8 @@ add_library(pmpp_cuda_lib
         cuda/stencil_1d.cu
         cuda/stencil_2d.cuh
         cuda/stencil_2d.cu
+        cuda/conv_2d.cuh
+        cuda/conv_2d.cu
 )
 target_include_directories(pmpp_cuda_lib PRIVATE ${EIGEN3_INCLUDE_DIR})
 
@@ -68,6 +70,7 @@ add_executable(pmpp_cuda_test main_test.cpp
         cuda/conv_1d_test.cpp
         cuda/stencil_1d_test.cpp
         cuda/stencil_2d_test.cpp
+        cuda/conv_2d_test.cpp
 )
 set_target_properties(pmpp_cuda_test PROPERTIES CUDA_SEPARABLE_COMPILATION OFF)
 target_compile_options(pmpp_cuda_test PRIVATE $<$<COMPILE_LANGUAGE:CUDA>:

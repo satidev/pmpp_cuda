@@ -17,17 +17,20 @@ __global__ void conv_kern_1d(float const *data,
                              unsigned filter_radius)
 {
     auto const idx = blockIdx.x * blockDim.x + threadIdx.x;
+
     if (idx < num_elems) {
+
         auto const filter_size = 2u * filter_radius + 1u;
         // Element by element multiplication and accumulation.
         auto sum = 0.0f;
         for (auto filt_idx = 0u; filt_idx < filter_size; ++filt_idx) {
             // Flipped data index.
-            auto const data_idx = static_cast<int>(idx) +
-                static_cast<int>(filter_radius) - static_cast<int>(filt_idx);
-            if (data_idx >= 0 && data_idx < num_elems) {
+            auto const data_idx = static_cast<int>(idx) - static_cast<int>(filt_idx) +
+                                    static_cast<int>(filter_radius);
+            if (data_idx >= 0 && data_idx < num_elems) {// Check the data is available (ghost
+                // cells).
                 sum += data[data_idx] * filter[filt_idx];
-            }
+            }//If the data is not available, add zero to the sum.
         }
         res[idx] = sum;
     }
@@ -35,6 +38,7 @@ __global__ void conv_kern_1d(float const *data,
 
 // Constant memory.
 auto constexpr FILT_SIZE_CONST_MEM = 1024u;
+
 __constant__ float FILTER_CONST[FILT_SIZE_CONST_MEM];
 
 __global__ void conv_kern_1d_const_mem(float const *data,
@@ -48,8 +52,8 @@ __global__ void conv_kern_1d_const_mem(float const *data,
         // Element by element multiplication and accumulation.
         auto sum = 0.0f;
         for (auto filt_idx = 0u; filt_idx < filter_size; ++filt_idx) {
-            auto const data_idx = static_cast<int>(idx) +
-                static_cast<int>(filter_radius) - static_cast<int>(filt_idx);
+            auto const data_idx = static_cast<int>(idx) - static_cast<int>(filt_idx) +
+                static_cast<int>(filter_radius);
             if (data_idx >= 0 && data_idx < num_elems) {
                 sum += data[data_idx] * FILTER_CONST[filt_idx];
             }
@@ -158,10 +162,12 @@ std::vector<float> conv1D(std::vector<float> const &data,
     if (num_data_elems == 0u) {
         throw std::invalid_argument{"Data vector is empty"};
     }
+
     // Check filter vector is empty.
     if (filter.empty()) {
         throw std::invalid_argument{"Filter vector is empty"};
     }
+
     // Check the number of elements is odd.
     if (filter.size() % 2u == 0u) {
         throw std::invalid_argument{"Filter size should be odd"};
