@@ -20,8 +20,6 @@ set(gtest_force_shared_crt ON CACHE BOOL "" FORCE)
 FetchContent_MakeAvailable(googletest)
 
 set(EIGEN3_INCLUDE_DIR "${CMAKE_CURRENT_SOURCE_DIR}/thirdparty")
-set(IPP_INCLUDE_DIR "/home/shiras/intel/oneapi/ipp/2021.10/include/ipp")
-link_directories("/home/shiras/intel/oneapi/ipp/2021.10/lib/intel64")
 enable_testing()
 add_library(pmpp_cuda_lib
         cpp/vec_add.h
@@ -48,8 +46,7 @@ add_library(pmpp_cuda_lib
         cuda/stencil_2d.cu
 )
 target_include_directories(pmpp_cuda_lib PRIVATE ${EIGEN3_INCLUDE_DIR})
-target_include_directories(pmpp_cuda_lib PRIVATE ${IPP_INCLUDE_DIR})
-target_link_libraries(pmpp_cuda_lib ippcore)
+
 
 add_executable(pmpp_cuda main.cu)
 set_target_properties(pmpp_cuda PROPERTIES CUDA_SEPARABLE_COMPILATION OFF)
@@ -60,8 +57,7 @@ target_compile_options(pmpp_cuda PRIVATE $<$<COMPILE_LANGUAGE:CUDA>:
         -ftemplate-backtrace-limit=0 >)
 target_link_libraries(pmpp_cuda pmpp_cuda_lib)
 target_include_directories(pmpp_cuda PRIVATE ${EIGEN3_INCLUDE_DIR})
-target_include_directories(pmpp_cuda PRIVATE ${IPP_INCLUDE_DIR})
-target_link_libraries(pmpp_cuda ippcore)
+
 
 add_executable(pmpp_cuda_test main_test.cpp
         cpp/vec_add_test.cpp
@@ -81,5 +77,3 @@ target_link_libraries(pmpp_cuda_test GTest::gtest_main)
 target_include_directories(pmpp_cuda_test PRIVATE ${EIGEN3_INCLUDE_DIR})
 include(GoogleTest)
 gtest_discover_tests(pmpp_cuda_test)
-target_include_directories(pmpp_cuda_test PRIVATE ${IPP_INCLUDE_DIR})
-target_link_libraries(pmpp_cuda_test ippcore)
