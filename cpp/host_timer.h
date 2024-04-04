@@ -10,8 +10,8 @@ public:
     float toc();
 
 private:
-    std::chrono::time_point<std::chrono::system_clock, std::chrono::nanoseconds> start;
-    std::chrono::time_point<std::chrono::system_clock, std::chrono::nanoseconds> end;
+    std::chrono::time_point<std::chrono::high_resolution_clock> start;
+    std::chrono::time_point<std::chrono::high_resolution_clock> end;
 };
 
 #endif //HOST_TIMER_H
