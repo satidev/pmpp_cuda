@@ -1,6 +1,7 @@
 #include "vec_add.h"
 #include <stdexcept>
 #include <algorithm>
+#include <iterator>
 
 namespace Numeric
 {
