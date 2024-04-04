@@ -110,7 +110,7 @@ Eigen::MatrixXf matMul(Eigen::MatrixXf const &a,
     // Execute the kernel.
     auto const shared_mem_per_blk = dev_config.getDevProps(0).max_shared_mem_per_block;
 
-    auto constexpr block_size = dim3{16u, 16u};
+    auto const block_size = dim3{16u, 16u};
     auto const num_block_x = (static_cast<unsigned>(b.cols()) + block_size.x - 1u) / block_size.x;
     auto const num_block_y = (static_cast<unsigned>(a.rows()) + block_size.y - 1u) / block_size.y;
     auto const grid_size = dim3{num_block_x, num_block_y};
@@ -119,8 +119,8 @@ Eigen::MatrixXf matMul(Eigen::MatrixXf const &a,
         if(block_size.x != block_size.y) {
             throw std::invalid_argument{"The number of threads per block in each dimension must be equal."};
         }
-        auto constexpr tile_width = block_size.x;
-        auto constexpr shared_mem_size = 2 * tile_width * tile_width * sizeof(float);
+        auto const tile_width = block_size.x;
+        auto const shared_mem_size = 2 * tile_width * tile_width * sizeof(float);
         if (shared_mem_size > shared_mem_per_blk) {
             throw std::runtime_error{"Shared memory size exceeds the limit."};
         }

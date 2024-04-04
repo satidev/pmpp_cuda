@@ -65,7 +65,7 @@ Eigen::MatrixXf sum5PointStencil(Eigen::MatrixXf const &ip_mat,
                "transfer of data from the input vector to the device");
 
 
-    auto constexpr block_size = dim3{16u, 16u};
+    auto const block_size = dim3{16u, 16u};
     auto const num_block_x = (static_cast<unsigned>(ip_mat.cols()) + block_size.x - 1u) /
         block_size.x;
     auto const num_block_y = (static_cast<unsigned>(ip_mat.rows()) + block_size.y - 1u) /
