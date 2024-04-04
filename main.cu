@@ -1,5 +1,5 @@
 #include <iostream>
-#include "../cuda/conv.cuh"
+#include "../cuda/conv_1d.cuh"
 #include "../cuda/vec_add.cuh"
 #include "cuda/dev_config.cuh"
 #include "cuda/exec_config.cuh"

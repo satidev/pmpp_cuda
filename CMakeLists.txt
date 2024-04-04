@@ -35,8 +35,8 @@ add_library(pmpp_cuda_lib
         cpp/host_timer.h
         cpp/host_timer.cpp
         cuda/exec_config.cuh
-        cuda/conv.cuh
-        cuda/conv.cu
+        cuda/conv_1d.cuh
+        cuda/conv_1d.cu
         cuda/check_error.cuh
         cuda/check_error.cu
         cuda/timer.cuh
@@ -65,7 +65,7 @@ add_executable(pmpp_cuda_test main_test.cpp
         cuda/vec_add_cuda_test.cpp
         cpp/eigen_utils_test.cpp
         cuda/mat_mul_cuda_test.cpp
-        cuda/conv_test.cpp
+        cuda/conv_1d_test.cpp
         cuda/stencil_1d_test.cpp
         cuda/stencil_2d_test.cpp
 )

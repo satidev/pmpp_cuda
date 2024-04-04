@@ -1,4 +1,4 @@
-#include "conv.cuh"
+#include "conv_1d.cuh"
 #include "exec_config.cuh"
 #include <stdexcept>
 

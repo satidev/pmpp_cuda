@@ -1,5 +1,5 @@
 #include <gmock/gmock.h>
-#include "conv.cuh"
+#include "conv_1d.cuh"
 
 TEST(conv1DTest, exceptionIsThrownSinceDataSizeIsZero)
 {

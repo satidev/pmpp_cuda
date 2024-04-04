@@ -1,5 +1,5 @@
-#ifndef CONV_CUH
-#define CONV_CUH
+#ifndef CONV_1D_CUH
+#define CONV_1D_CUH
 
 #include <vector>
 
@@ -12,4 +12,4 @@ std::vector<float> conv1D(std::vector<float> const &data,
 
 } // Numeric::CUDA namespace.
 
-#endif //CONV_CUH
+#endif //CONV_1D_CUH
