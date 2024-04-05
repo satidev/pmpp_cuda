@@ -212,14 +212,18 @@ std::vector<float> conv1D(std::vector<float> const &data,
         if (shared_mem_size > shared_mem_per_blk) {
             throw std::invalid_argument{"The shared memory size exceeds the device limit"};
         }
-        auto const block_size = ip_tile_width;
-        auto const grid_size = (num_data_elems + ip_tile_width - 1u) / ip_tile_width;
+
         if (use_const_mem) {
+            auto const block_size = ip_tile_width;
+            auto const grid_size = (num_data_elems + ip_tile_width - 1u) / ip_tile_width;
             conv_kern_1d_const_mem_sm<<<grid_size, block_size, shared_mem_size>>>(
                 data_dev, res_dev, static_cast<unsigned>(num_data_elems),
                 static_cast<unsigned>(filter_radius));
         }
         else {
+            auto const block_size = ip_tile_width;
+            auto const op_tile_width = ip_tile_width - 2u * filter_radius;
+            auto const grid_size = (num_data_elems + op_tile_width - 1u) / op_tile_width;
             conv_kern_1d_sm<<<grid_size, block_size, shared_mem_size>>>(
                 data_dev, filter_dev, res_dev, static_cast<unsigned>(num_data_elems),
                 static_cast<unsigned>(filter_radius));

@@ -96,3 +96,12 @@ TEST(conv1DTest, correctConv1DResultForIdentityKernelLargeArray)
     EXPECT_THAT(Numeric::CUDA::conv1D(data, filter, false, true), ::testing::ContainerEq(data));
     EXPECT_THAT(Numeric::CUDA::conv1D(data, filter, true, true), ::testing::ContainerEq(data));
 }
+
+TEST(conv1DTest, correctConv1DResultForIdentityKernelSpecialCaseNumElemsMultipleOfBlockDim)
+{
+    auto const block_size = 768u;
+    auto const data = std::vector<float>(block_size * 2u, 1.0f);
+    auto const filter = std::vector<float>{0.0f, 1.0f, 0.0f};
+    EXPECT_THAT(Numeric::CUDA::conv1D(data, filter, false, true), ::testing::ContainerEq(data));
+    EXPECT_THAT(Numeric::CUDA::conv1D(data, filter, true, true), ::testing::ContainerEq(data));
+}
