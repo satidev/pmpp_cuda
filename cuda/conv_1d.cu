@@ -77,28 +77,34 @@ __global__ void conv_kern_1d_sm(float const *data,
                                 unsigned num_elems,
                                 unsigned filter_radius)
 {
-    auto const ip_tile_width = blockDim.x;
-    auto const op_tile_width = ip_tile_width - 2u * filter_radius;
+    auto const ip_tile_width = static_cast<int>(blockDim.x);
+    // Based on op_tile_width, the grid size is calculated.
+    auto const op_tile_width = static_cast<int>(ip_tile_width) -
+        static_cast<int>(2u * filter_radius);
 
-    auto const idx = blockIdx.x * op_tile_width + threadIdx.x - filter_radius;
+    auto const idx = static_cast<int>(blockIdx.x * op_tile_width + threadIdx.x) -
+        static_cast<int>(filter_radius);
 
-    // Declare and allocate shared memory.
-    extern __shared__ float sm[];
     // Copy the tile to shared memory.
-    if (idx < num_elems) {
+    extern __shared__ float sm[];
+    if (idx >= 0 && idx < static_cast<int>(num_elems)) {
         sm[threadIdx.x] = data[idx];
     }
     else {
         sm[threadIdx.x] = 0.0f;
     }
     __syncthreads();
-    auto const tile_idx = threadIdx.x - filter_radius;
-    if (idx < num_elems) {
-        if (tile_idx < op_tile_width) {
+
+
+    auto const tile_idx = static_cast<int>(threadIdx.x) -
+        static_cast<int>(filter_radius);
+
+    if (idx >= 0 && idx < static_cast<int>(num_elems)) {
+        if (tile_idx >= 0 && tile_idx < op_tile_width) {
             auto sum = 0.0f;
             auto const filter_size = 2u * filter_radius + 1u;
             for (auto filt_idx = 0u; filt_idx < filter_size; ++filt_idx) {
-                //Instead of data, kernel index is flipped.
+                // Instead of data, kernel index is flipped.
                 sum += sm[tile_idx + filt_idx] * filter[filter_size - 1 - filt_idx];
             }
             res[idx] = sum;
