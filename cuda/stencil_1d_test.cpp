@@ -34,7 +34,8 @@ TEST(cuda1DSum3PointTest, returnsCorrectOutput)
 {
     auto const ip_vec = std::vector{-1.0f, 2.0f, 3.0f};
     auto const op_exp = std::vector{-1.0f, 4.0f, 3.0f};
-    ASSERT_THAT(Numeric::CUDA::sum3Point(ip_vec), op_exp);
+    ASSERT_THAT(Numeric::CUDA::sum3Point(ip_vec, false), op_exp);
+    ASSERT_THAT(Numeric::CUDA::sum3Point(ip_vec, true), op_exp);
 }
 
 TEST(cuda1DSum3PointTest, correctOutputLargeVector)
@@ -44,7 +45,8 @@ TEST(cuda1DSum3PointTest, correctOutputLargeVector)
     op_exp.front() = 1.0f;
     op_exp.back() = 1.0f;
 
-    ASSERT_THAT(Numeric::CUDA::sum3Point(ip_vec), op_exp);
+    ASSERT_THAT(Numeric::CUDA::sum3Point(ip_vec, false), op_exp);
+    ASSERT_THAT(Numeric::CUDA::sum3Point(ip_vec, true), op_exp);
 }
 
 
