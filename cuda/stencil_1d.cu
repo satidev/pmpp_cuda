@@ -31,8 +31,8 @@ __global__ void sum_3point_kernel(float const *ip, float *op,
 __global__ void sum_3point_sm_kernel(float const *ip, float *op,
                                      unsigned num_elems)
 {
-    auto const ip_tile_size = blockDim.x;
-    auto const op_tile_size = ip_tile_size - 2u;
+    auto const ip_tile_size = static_cast<int>(blockDim.x);
+    auto const op_tile_size = ip_tile_size - 2;
 
     auto const idx = static_cast<int>(blockIdx.x * op_tile_size + threadIdx.x) - 1;
 
@@ -46,16 +46,17 @@ __global__ void sum_3point_sm_kernel(float const *ip, float *op,
     }
     __syncthreads();
 
-    if(idx > 0 && idx < (num_elems - 1)) {
-        if(threadIdx.x > 0 && threadIdx.x < (ip_tile_size - 1u)) {
-            op[idx] = sm[threadIdx.x - 1] + sm[threadIdx.x] + sm[threadIdx.x + 1];
+    if(idx >= 0 && idx < num_elems){
+
+        if(idx > 0 && idx < (num_elems - 1)) {
+            if(threadIdx.x > 0 && threadIdx.x < (ip_tile_size - 1u)) {
+                op[idx] = sm[threadIdx.x - 1] + sm[threadIdx.x] + sm[threadIdx.x + 1];
+            }
+        }
+        else{// Boundary conditions.
+            op[idx] = ip[idx];
         }
     }
-    else if (idx == 0u || idx == (num_elems - 1)) {// Boundary conditions.
-        // Copy endpoint values.
-        op[idx] = ip[idx];
-    }
-
 }
 
 std::vector<float> diff(std::vector<float> const &ip_vec)
