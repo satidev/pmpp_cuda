@@ -16,6 +16,8 @@ enum class CoarseningStrategy
 };
 std::vector<unsigned> histogramPrivateSharedCoarse(std::vector<bool> const &data_host,
                                                    CoarseningStrategy strategy);
+// Interleaved coarsening + aggregation.
+std::vector<unsigned> histogramPrivateSharedCoarseAggr(std::vector<bool> const &data_host);
 }// Numeric::CUDA namespace.
 
 #endif //HISTOGRAM_CUH
