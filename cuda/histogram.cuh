@@ -7,6 +7,7 @@ namespace Numeric::CUDA
 {
 std::vector<unsigned> histogram(std::vector<bool> const &data_host);
 std::vector<unsigned> histogramPrivatization(std::vector<bool> const &data_host);
+std::vector<unsigned> histogramPrivateShared(std::vector<bool> const &data_host);
 }// Numeric::CUDA namespace.
 
 #endif //HISTOGRAM_CUH
