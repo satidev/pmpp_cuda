@@ -196,6 +196,12 @@ __global__ void hist_kern_privat_sm(unsigned short const *data,
     // Initialize shared memory to zero.
     // Each block has shared memory to store the histogram values.
     extern __shared__ unsigned hist_sm[];
+    // The loop essential if the number of threads is less than the number of bins.
+    // If the number of threads is greater than the number of bins
+    // the following if condition is sufficient.
+    // if(threadIdx.x < num_hist_bins) {
+    //   hist_sm[threadIdx.x] = 0u;
+    // }
     for (auto bin = threadIdx.x; bin < num_hist_bins; bin += blockDim.x) {
         hist_sm[bin] = 0u;
     }
