@@ -9,6 +9,7 @@ TEST(histTest, emptyVectorOutputWhenInputIsEmpty)
     ASSERT_TRUE(std::empty(histogram(empty_vec)));
     ASSERT_TRUE(std::empty(histogramPrivatization(empty_vec)));
     ASSERT_TRUE(std::empty(histogramPrivateShared(empty_vec)));
+    ASSERT_TRUE(std::empty(histogramPrivateSharedCoarse(empty_vec, CoarseningStrategy::CONTIGUOUS_PARTITIONING)));
 }
 
 TEST(histTest, uniformHistogram)
@@ -18,6 +19,8 @@ TEST(histTest, uniformHistogram)
     ASSERT_THAT(histogram(data), hist_exp);
     ASSERT_THAT(histogramPrivatization(data), hist_exp);
     ASSERT_THAT(histogramPrivateShared(data), hist_exp);
+    ASSERT_THAT(histogramPrivateSharedCoarse(data, CoarseningStrategy::CONTIGUOUS_PARTITIONING), hist_exp);
+    ASSERT_THAT(histogramPrivateSharedCoarse(data, CoarseningStrategy::INTERLEAVED_PARTITIONING), hist_exp);
 }
 
 TEST(histTest, skewedHistogram)
@@ -27,6 +30,8 @@ TEST(histTest, skewedHistogram)
     ASSERT_THAT(histogram(data), hist_exp);
     ASSERT_THAT(histogramPrivatization(data), hist_exp);
     ASSERT_THAT(histogramPrivateShared(data), hist_exp);
+    ASSERT_THAT(histogramPrivateSharedCoarse(data, CoarseningStrategy::CONTIGUOUS_PARTITIONING), hist_exp);
+    ASSERT_THAT(histogramPrivateSharedCoarse(data, CoarseningStrategy::INTERLEAVED_PARTITIONING), hist_exp);
 }
 
 TEST(histTest, skewedHistogramLargeVector)
@@ -37,5 +42,6 @@ TEST(histTest, skewedHistogramLargeVector)
     ASSERT_THAT(histogramPrivatization(data), hist_exp);
     ASSERT_THAT(histogramPrivateShared(data), hist_exp);
     ASSERT_THAT(histogramPrivateSharedCoarse(data, CoarseningStrategy::CONTIGUOUS_PARTITIONING), hist_exp);
+    ASSERT_THAT(histogramPrivateSharedCoarse(data, CoarseningStrategy::INTERLEAVED_PARTITIONING), hist_exp);
 }
 

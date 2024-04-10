@@ -303,9 +303,49 @@ __global__ void hist_kern_privat_sm_coarse_contig(unsigned short const *data,
     auto const idx = blockIdx.x * blockDim.x + threadIdx.x;
 
     // More works per each thread to reduce the number of blocks.
-    auto const start  = idx * coarse_factor;
+    auto const start = idx * coarse_factor;
     auto const end = min(idx * coarse_factor + coarse_factor, num_data_elems);
     for (auto new_idx = start; new_idx < end; new_idx++) {
+
+        if (data[new_idx] == 0) {
+            atomicAdd(&(hist_sm[0]), 1u);
+        }
+        else {
+            atomicAdd(&(hist_sm[1]), 1u);
+        }
+    }
+    __syncthreads();// Wait till all threads of the block finish their histogram copy update.
+
+    for (auto bin = threadIdx.x; bin < num_hist_bins; bin += blockDim.x) {
+        auto const bin_value = hist_sm[bin];
+        if (bin_value > 0) {
+            atomicAdd(&(hist[bin]), bin_value);
+        }
+    }
+
+}
+
+__global__ void hist_kern_privat_sm_coarse_interleaved(unsigned short const *data,
+                                                       unsigned *hist,
+                                                       unsigned num_data_elems,
+                                                       unsigned num_hist_bins,
+                                                       unsigned coarse_factor)
+{
+    // Initialize shared memory to zero.
+    // Each block has shared memory to store the histogram values.
+    extern __shared__ unsigned hist_sm[];
+    for (auto bin = threadIdx.x; bin < num_hist_bins; bin += blockDim.x) {
+        hist_sm[bin] = 0u;
+    }
+    __syncthreads();
+
+    auto const idx = blockIdx.x * blockDim.x + threadIdx.x;
+
+    // More works per each thread to reduce the number of blocks.
+    auto const start = idx;
+    auto const end = num_data_elems;
+    auto const total_num_threads = gridDim.x * blockDim.x;
+    for (auto new_idx = start; new_idx < end; new_idx += total_num_threads) {
 
         if (data[new_idx] == 0) {
             atomicAdd(&(hist_sm[0]), 1u);
@@ -372,7 +412,7 @@ std::vector<unsigned> histogramPrivateSharedCoarse(std::vector<bool> const &data
     auto const coarse_factor = 16u;
     // Reduction of the number of blocks by factor coarse factor.
     auto const grid_size = static_cast<unsigned>(std::ceil(static_cast<float>(num_data_elems) /
-                                                           static_cast<float>(coarse_factor * block_size)));
+        static_cast<float>(coarse_factor * block_size)));
     switch (strategy) {
         case CoarseningStrategy::CONTIGUOUS_PARTITIONING:
             hist_kern_privat_sm_coarse_contig<<<grid_size, block_size, shared_mem_bytes>>>(
@@ -381,10 +421,10 @@ std::vector<unsigned> histogramPrivateSharedCoarse(std::vector<bool> const &data
                 coarse_factor);
             break;
         case CoarseningStrategy::INTERLEAVED_PARTITIONING:
-            //hist_kern_privat<<<exec_params.grid_dim, exec_params.block_dim>>>(
-            //    data_i_dev, hist_dev,
-            //    static_cast<unsigned>(num_data_elems),
-            //    static_cast<unsigned>(num_hist_bins));
+            hist_kern_privat_sm_coarse_interleaved<<<grid_size, block_size, shared_mem_bytes>>>(
+                data_i_dev, hist_dev, static_cast<unsigned>(num_data_elems),
+                static_cast<unsigned>(num_hist_bins),
+                coarse_factor);
             break;
     }
     checkErrorKernel("Histogram kernel", true);
