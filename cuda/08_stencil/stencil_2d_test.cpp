@@ -1,6 +1,6 @@
 #include <gmock/gmock.h>
 #include "stencil_2d.cuh"
-#include "../cpp/eigen_utils.h"
+#include "../../cpp/eigen_utils.h"
 #include <stdexcept>
 
 using namespace Numeric::CUDA;

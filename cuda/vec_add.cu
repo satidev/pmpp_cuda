@@ -1,8 +1,8 @@
 #include "vec_add.cuh"
-#include "exec_config.cuh"
+#include "utils/exec_config.cuh"
 #include <stdexcept>
-#include "check_error.cuh"
-#include "timer.cuh"
+#include "utils/check_error.cuh"
+#include "utils/timer.cuh"
 
 namespace Numeric::CUDA
 {

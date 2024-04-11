@@ -1,7 +1,7 @@
 #ifndef CONV_2D_CUH
 #define CONV_2D_CUH
 
-#include "../thirdparty/Eigen/Core"
+#include "Eigen/Core"
 
 namespace Numeric::CUDA
 {

@@ -1,5 +1,5 @@
 #include "mat_mul.cuh"
-#include "dev_config.cuh"
+#include "utils/dev_config.cuh"
 
 namespace Numeric::CUDA
 {

@@ -1,5 +1,5 @@
 #include "conv_1d.cuh"
-#include "exec_config.cuh"
+#include "../utils/exec_config.cuh"
 #include <stdexcept>
 
 namespace Numeric::CUDA

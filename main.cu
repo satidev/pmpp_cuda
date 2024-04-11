@@ -1,10 +1,10 @@
 #include <iostream>
-#include "../cuda/conv_1d.cuh"
+#include "cuda/07_convolution/conv_1d.cuh"
 #include "../cuda/vec_add.cuh"
-#include "cuda/dev_config.cuh"
-#include "cuda/exec_config.cuh"
+#include "cuda/utils/dev_config.cuh"
+#include "cuda/utils/exec_config.cuh"
 #include "../cpp/host_timer.h"
-#include "../cuda/stencil_1d.cuh"
+#include "cuda/08_stencil/stencil_1d.cuh"
 
 int main()
 {

@@ -30,25 +30,25 @@ add_library(pmpp_cuda_lib
         cpp/eigen_utils.h
         cuda/mat_mul.cuh
         cuda/mat_mul.cu
-        cuda/dev_config.cuh
-        cuda/dev_config.cu
+        cuda/utils/dev_config.cuh
+        cuda/utils/dev_config.cu
         cpp/host_timer.h
         cpp/host_timer.cpp
-        cuda/exec_config.cuh
-        cuda/conv_1d.cuh
-        cuda/conv_1d.cu
-        cuda/check_error.cuh
-        cuda/check_error.cu
-        cuda/timer.cuh
-        cuda/timer.cu
-        cuda/stencil_1d.cuh
-        cuda/stencil_1d.cu
-        cuda/stencil_2d.cuh
-        cuda/stencil_2d.cu
-        cuda/conv_2d.cuh
-        cuda/conv_2d.cu
-        cuda/histogram.cuh
-        cuda/histogram.cu
+        cuda/utils/exec_config.cuh
+        cuda/07_convolution/conv_1d.cuh
+        cuda/07_convolution/conv_1d.cu
+        cuda/utils/check_error.cuh
+        cuda/utils/check_error.cu
+        cuda/utils/timer.cuh
+        cuda/utils/timer.cu
+        cuda/08_stencil/stencil_1d.cuh
+        cuda/08_stencil/stencil_1d.cu
+        cuda/08_stencil/stencil_2d.cuh
+        cuda/08_stencil/stencil_2d.cu
+        cuda/07_convolution/conv_2d.cuh
+        cuda/07_convolution/conv_2d.cu
+        cuda/09_histogram/histogram.cuh
+        cuda/09_histogram/histogram.cu
 )
 target_include_directories(pmpp_cuda_lib PRIVATE ${EIGEN3_INCLUDE_DIR})
 
@@ -69,11 +69,11 @@ add_executable(pmpp_cuda_test main_test.cpp
         cuda/vec_add_cuda_test.cpp
         cpp/eigen_utils_test.cpp
         cuda/mat_mul_cuda_test.cpp
-        cuda/conv_1d_test.cpp
-        cuda/stencil_1d_test.cpp
-        cuda/stencil_2d_test.cpp
-        cuda/conv_2d_test.cpp
-        cuda/histogram_test.cpp
+        cuda/07_convolution/conv_1d_test.cpp
+        cuda/08_stencil/stencil_1d_test.cpp
+        cuda/08_stencil/stencil_2d_test.cpp
+        cuda/07_convolution/conv_2d_test.cpp
+        cuda/09_histogram/histogram_test.cpp
 )
 set_target_properties(pmpp_cuda_test PROPERTIES CUDA_SEPARABLE_COMPILATION OFF)
 target_compile_options(pmpp_cuda_test PRIVATE $<$<COMPILE_LANGUAGE:CUDA>:

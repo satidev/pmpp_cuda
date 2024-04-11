@@ -1,6 +1,6 @@
 #include "stencil_1d.cuh"
-#include "exec_config.cuh"
-#include "check_error.cuh"
+#include "../utils/exec_config.cuh"
+#include "../utils/check_error.cuh"
 
 namespace Numeric::CUDA
 {

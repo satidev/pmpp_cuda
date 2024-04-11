@@ -1,6 +1,6 @@
 #include "histogram.cuh"
-#include "check_error.cuh"
-#include "exec_config.cuh"
+#include "../utils/check_error.cuh"
+#include "../utils/exec_config.cuh"
 
 namespace Numeric::CUDA
 {

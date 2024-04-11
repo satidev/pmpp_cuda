@@ -1,7 +1,7 @@
 #include "stencil_2d.cuh"
-#include "../cpp/eigen_utils.h"
+#include "../../cpp/eigen_utils.h"
 #include <stdexcept>
-#include "check_error.cuh"
+#include "../utils/check_error.cuh"
 
 namespace Numeric::CUDA
 {

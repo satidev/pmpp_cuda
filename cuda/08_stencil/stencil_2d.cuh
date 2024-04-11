@@ -1,7 +1,7 @@
 #ifndef STENCIL_2D_CUH
 #define STENCIL_2D_CUH
 
-#include "../thirdparty/Eigen/Core"
+#include "Eigen/Core"
 
 namespace Numeric::CUDA
 {

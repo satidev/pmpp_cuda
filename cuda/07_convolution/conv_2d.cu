@@ -1,5 +1,5 @@
 #include "conv_2d.cuh"
-#include "../cpp/eigen_utils.h"
+#include "../../cpp/eigen_utils.h"
 
 namespace Numeric::CUDA
 {
