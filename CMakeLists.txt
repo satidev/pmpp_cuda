@@ -49,6 +49,8 @@ add_library(pmpp_cuda_lib
         cuda/07_convolution/conv_2d.cu
         cuda/09_histogram/histogram.cuh
         cuda/09_histogram/histogram.cu
+        cuda/10_reduction/sum.cuh
+        cuda/10_reduction/sum.cu
 )
 target_include_directories(pmpp_cuda_lib PRIVATE ${EIGEN3_INCLUDE_DIR})
 
@@ -74,6 +76,7 @@ add_executable(pmpp_cuda_test main_test.cpp
         cuda/08_stencil/stencil_2d_test.cpp
         cuda/07_convolution/conv_2d_test.cpp
         cuda/09_histogram/histogram_test.cpp
+        cuda/10_reduction/sum_test.cpp
 )
 set_target_properties(pmpp_cuda_test PROPERTIES CUDA_SEPARABLE_COMPILATION OFF)
 target_compile_options(pmpp_cuda_test PRIVATE $<$<COMPILE_LANGUAGE:CUDA>:
