@@ -33,20 +33,42 @@ __global__ void sumParallelSimple(float *data,
 {
     auto const mem_loc = 2 * threadIdx.x;
 
-    for(auto stride = 1u; stride < num_elems; stride *= 2){
-          if(threadIdx.x % stride == 0){
-              data[mem_loc] += data[mem_loc + stride];
-          }
-          __syncthreads();
+    for (auto stride = 1u; stride < num_elems; stride *= 2) {
+        if (threadIdx.x % stride == 0) {
+            data[mem_loc] += data[mem_loc + stride];
+        }
+        __syncthreads();
     }
 
-    if(threadIdx.x == 0){
+    if (threadIdx.x == 0) {
         *sum = data[0];
     }
 }
 
+// Kernel with reduced warp divergence.
+__global__ void sumParallelSimpleMinDiv(float *data,
+                                        float *sum,
+                                        unsigned num_elems)
+{
+    auto const mem_loc = threadIdx.x;
+    // It is assumed that num_elems == blockDim.x.
+    for (auto stride = blockDim.x; stride >= 1u; stride /= 2) {
+        if (threadIdx.x < stride) {
+            data[mem_loc] += data[mem_loc + stride];
+        }
+        __syncthreads();
+    }
+
+    if (threadIdx.x == 0) {
+        *sum = data[0];
+    }
+}
 float sumParallel(std::vector<float> const &data_host)
 {
+    if (std::size(data_host) % 32 != 0) {
+        throw std::invalid_argument{"Data size should be a multiple of 32 (warp size)\n"};
+    }
+
     if (std::empty(data_host)) {
         return 0.0f;
     }
@@ -65,22 +87,26 @@ float sumParallel(std::vector<float> const &data_host)
         auto data_dev = static_cast<float *>(nullptr);
         checkError(cudaMalloc(reinterpret_cast<void **>(&data_dev), data_size_bytes),
                    "allocation of device buffer for data");
-        checkError(cudaMemcpy(data_dev, std::data(data_host), data_size_bytes, cudaMemcpyHostToDevice),
+        checkError(cudaMemcpy(data_dev,
+                              std::data(data_host),
+                              data_size_bytes,
+                              cudaMemcpyHostToDevice),
                    "transfer of data from the host to the device");
 
         // Currently, only a single block can be launched.
         // It is better to keep the number of threads per block as a multiple of warp size.
         auto const block_size = static_cast<unsigned>(
-            std::ceil(static_cast<float>(num_elems) / 32.0f)) * 32u;
-        if(block_size > max_num_threads){
-            throw std::invalid_argument{"Block size exceeds the maximum number of threads per block.\n"};
+            std::ceil(static_cast<float>(num_elems) / 64.0f)) * 32u;
+        if (block_size > max_num_threads) {
+            throw std::invalid_argument{
+                "Block size exceeds the maximum number of threads per block.\n"};
         }
         auto const grid_size = 1u;
         auto sum_dev = static_cast<float *>(nullptr);
         cudaMalloc(reinterpret_cast<void **>(&sum_dev), sizeof(float));
         cudaMemset(sum_dev, 0, sizeof(float));
 
-        sumParallelSimple<<<grid_size, block_size>>>(data_dev, sum_dev, num_elems);
+        sumParallelSimpleMinDiv<<<grid_size, block_size>>>(data_dev, sum_dev, num_elems);
         checkError(cudaGetLastError(), "launch of sumKernel");
 
         auto sum_host = 0.0f;
