@@ -1,6 +1,6 @@
 #include <iostream>
 #include "cuda/07_convolution/conv_1d.cuh"
-#include "../cuda/vec_add.cuh"
+#include "cuda/02_vec_add/vec_add.cuh"
 #include "cuda/utils/dev_config.cuh"
 #include "cuda/utils/exec_config.cuh"
 #include "../cpp/host_timer.h"

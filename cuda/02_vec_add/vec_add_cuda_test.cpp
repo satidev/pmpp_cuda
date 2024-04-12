@@ -1,6 +1,6 @@
 #include <gmock/gmock.h>
 #include "vec_add.cuh"
-#include "../cpp/host_timer.h"
+#include "../../cpp/host_timer.h"
 
 TEST(cudaVecAddTest, exceptThrowSizeMismatch)
 {

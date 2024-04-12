@@ -25,8 +25,8 @@ enable_testing()
 add_library(pmpp_cuda_lib
         cpp/vec_add.h
         cpp/vec_add.cpp
-        cuda/vec_add.cu
-        cuda/vec_add.cuh
+        cuda/02_vec_add/vec_add.cu
+        cuda/02_vec_add/vec_add.cuh
         cpp/eigen_utils.h
         cuda/mat_mul.cuh
         cuda/mat_mul.cu
@@ -68,7 +68,7 @@ target_include_directories(pmpp_cuda PRIVATE ${EIGEN3_INCLUDE_DIR})
 
 add_executable(pmpp_cuda_test main_test.cpp
         cpp/vec_add_test.cpp
-        cuda/vec_add_cuda_test.cpp
+        cuda/02_vec_add/vec_add_cuda_test.cpp
         cpp/eigen_utils_test.cpp
         cuda/mat_mul_cuda_test.cpp
         cuda/07_convolution/conv_1d_test.cpp
