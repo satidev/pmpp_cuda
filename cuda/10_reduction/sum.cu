@@ -51,7 +51,6 @@ __global__ void sumParallelSimpleMinDiv(float *data,
                                         unsigned num_elems)
 {
     auto const mem_loc = threadIdx.x;
-    // It is assumed that num_elems == blockDim.x.
     for (auto stride = blockDim.x; stride >= 1u; stride /= 2) {
         if (threadIdx.x < stride) {
             data[mem_loc] += data[mem_loc + stride];
@@ -63,6 +62,29 @@ __global__ void sumParallelSimpleMinDiv(float *data,
         *sum = data[0];
     }
 }
+
+// Kernel with reduced warp divergence and shared memory.
+__global__ void sumParallelSimpleMinDivShared(float const *data,
+                                              float *sum,
+                                              unsigned num_elems)
+{
+    // Copy the result of the first iteration to shared memory.
+    extern __shared__ float partial_sum[];
+    auto const mem_loc = threadIdx.x;
+    partial_sum[mem_loc] = data[mem_loc] + data[mem_loc + blockDim.x];
+
+    for (auto stride = blockDim.x/2u; stride >= 1u; stride /= 2) {
+        if (threadIdx.x < stride) {
+            partial_sum[mem_loc] += partial_sum[mem_loc + stride];
+        }
+        __syncthreads();
+    }
+
+    if (threadIdx.x == 0) {
+        *sum = partial_sum[0];
+    }
+}
+
 float sumParallel(std::vector<float> const &data_host)
 {
     if (std::size(data_host) % 32 != 0) {
@@ -106,7 +128,7 @@ float sumParallel(std::vector<float> const &data_host)
         cudaMalloc(reinterpret_cast<void **>(&sum_dev), sizeof(float));
         cudaMemset(sum_dev, 0, sizeof(float));
 
-        sumParallelSimpleMinDiv<<<grid_size, block_size>>>(data_dev, sum_dev, num_elems);
+        sumParallelSimpleMinDivShared<<<grid_size, block_size>>>(data_dev, sum_dev, num_elems);
         checkError(cudaGetLastError(), "launch of sumKernel");
 
         auto sum_host = 0.0f;
