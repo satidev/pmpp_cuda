@@ -16,7 +16,6 @@ float sumSeq(std::vector<float> const &data)
         return std::accumulate(std::begin(data), std::end(data), 0.0f);
     }
 }
-// Similar to the sequential addition.
 __global__ void sumKernelNaive(float const *data,
                                float *sum,
                                unsigned num_elems)
@@ -73,7 +72,7 @@ __global__ void sumParallelSimpleMinDivShared(float const *data,
     auto const mem_loc = threadIdx.x;
     partial_sum[mem_loc] = data[mem_loc] + data[mem_loc + blockDim.x];
 
-    for (auto stride = blockDim.x/2u; stride >= 1u; stride /= 2) {
+    for (auto stride = blockDim.x / 2u; stride >= 1u; stride /= 2) {
         if (threadIdx.x < stride) {
             partial_sum[mem_loc] += partial_sum[mem_loc + stride];
         }
@@ -85,7 +84,30 @@ __global__ void sumParallelSimpleMinDivShared(float const *data,
     }
 }
 
-float sumParallel(std::vector<float> const &data_host)
+__global__ void sumParallelSimpleMinDivSharedMultBlock(float const *data,
+                                                       float *sum,
+                                                       unsigned num_elems)
+{
+    // Copy the result of the first iteration to shared memory.
+    extern __shared__ float partial_sum[];
+    auto const data_mem_loc = 2 * blockIdx.x * blockDim.x + threadIdx.x;
+    auto const shared_mem_loc = threadIdx.x;
+    partial_sum[shared_mem_loc] = data[data_mem_loc] + data[data_mem_loc + blockDim.x];
+
+    for (auto stride = blockDim.x / 2u; stride >= 1u; stride /= 2) {
+        if (shared_mem_loc < stride) {
+            partial_sum[shared_mem_loc] += partial_sum[shared_mem_loc + stride];
+        }
+        __syncthreads();
+    }
+
+    if (threadIdx.x == 0) {
+        atomicAdd(sum, partial_sum[0]);
+    }
+}
+
+float sumParallel(std::vector<float> const &data_host,
+                  ReductionStrategy strategy)
 {
     if (std::size(data_host) % 32 != 0) {
         throw std::invalid_argument{"Data size should be a multiple of 32 (warp size)\n"};
@@ -115,21 +137,48 @@ float sumParallel(std::vector<float> const &data_host)
                               cudaMemcpyHostToDevice),
                    "transfer of data from the host to the device");
 
-        // Currently, only a single block can be launched.
-        // It is better to keep the number of threads per block as a multiple of warp size.
-        auto const block_size = static_cast<unsigned>(
-            std::ceil(static_cast<float>(num_elems) / 64.0f)) * 32u;
-        if (block_size > max_num_threads) {
-            throw std::invalid_argument{
-                "Block size exceeds the maximum number of threads per block.\n"};
-        }
-        auto const grid_size = 1u;
         auto sum_dev = static_cast<float *>(nullptr);
-        cudaMalloc(reinterpret_cast<void **>(&sum_dev), sizeof(float));
-        cudaMemset(sum_dev, 0, sizeof(float));
+        checkError(cudaMalloc(reinterpret_cast<void **>(&sum_dev), sizeof(float)),
+                   "allocation of device buffer for sum");
+        checkError(cudaMemset(sum_dev, 0, sizeof(float)),
+                   "initialization of sum buffer");
 
-        sumParallelSimpleMinDivShared<<<grid_size, block_size>>>(data_dev, sum_dev, num_elems);
-        checkError(cudaGetLastError(), "launch of sumKernel");
+        switch (strategy) {
+            case ReductionStrategy::NAIVE: {
+                auto const [grid_size, block_size] = Detail::execConfig(num_elems, strategy);
+                sumKernelNaive<<<grid_size, block_size>>>(data_dev, sum_dev, num_elems);
+            }
+                break;
+
+            case ReductionStrategy::SIMPLE: {
+                auto const [grid_size, block_size] = Detail::execConfig(num_elems, strategy);
+                sumParallelSimple<<<grid_size, block_size>>>(data_dev, sum_dev, num_elems);
+            }
+                break;
+
+            case ReductionStrategy::SIMPLE_MIN_DIV: {
+                auto const [grid_size, block_size] = Detail::execConfig(num_elems, strategy);
+                sumParallelSimpleMinDiv<<<grid_size, block_size>>>(data_dev, sum_dev, num_elems);
+            }
+                break;
+
+            case ReductionStrategy::SIMPLE_MIN_DIV_SHARED: {
+                auto const [grid_size, block_size] = Detail::execConfig(num_elems, strategy);
+                sumParallelSimpleMinDivShared<<<grid_size, block_size, block_size
+                    * sizeof(float)>>>(
+                    data_dev, sum_dev, num_elems);
+            }
+                break;
+
+            case ReductionStrategy::SIMPLE_MIN_DIV_SHARED_MULT_BLOCKS: {
+                auto const [grid_size, block_size] = Detail::execConfig(num_elems, strategy);
+                sumParallelSimpleMinDivSharedMultBlock<<<grid_size, block_size, block_size
+                    * sizeof(float)>>>(
+                    data_dev, sum_dev, num_elems);
+            }
+                break;
+        }
+        checkError(cudaGetLastError(), "launch of sum kernel");
 
         auto sum_host = 0.0f;
         checkError(cudaMemcpy(&sum_host, sum_dev, sizeof(float), cudaMemcpyDeviceToHost),
@@ -141,5 +190,52 @@ float sumParallel(std::vector<float> const &data_host)
         return sum_host;
     }
 }
+namespace Detail
+{
+std::pair<unsigned, unsigned> execConfig(unsigned num_data_elems,
+                                         ReductionStrategy strategy)
+{
+    switch (strategy) {
+        case ReductionStrategy::NAIVE: {
+            auto const block_size = static_cast<unsigned>(
+                std::ceil(static_cast<float>(num_data_elems) / 32.0f)) * 32u;
+            auto const grid_size = 1u;
+            return std::make_pair(grid_size, block_size);
+        }
+            break;
 
+        case ReductionStrategy::SIMPLE: {
+            auto const block_size = static_cast<unsigned>(
+                std::ceil(static_cast<float>(num_data_elems) / 64.0f)) * 32u;
+            auto const grid_size = 1u;
+            return std::make_pair(grid_size, block_size);
+        }
+            break;
+
+        case ReductionStrategy::SIMPLE_MIN_DIV: {
+            auto const block_size = static_cast<unsigned>(
+                std::ceil(static_cast<float>(num_data_elems) / 64.0f)) * 32u;
+            auto const grid_size = 1u;
+            return std::make_pair(grid_size, block_size);
+        }
+            break;
+
+        case ReductionStrategy::SIMPLE_MIN_DIV_SHARED: {
+            auto const block_size = static_cast<unsigned>(
+                std::ceil(static_cast<float>(num_data_elems) / 64.0f)) * 32u;
+            auto const grid_size = 1u;
+            return std::make_pair(grid_size, block_size);
+        }
+            break;
+
+        case ReductionStrategy::SIMPLE_MIN_DIV_SHARED_MULT_BLOCKS: {
+            auto const block_size = static_cast<unsigned>(
+                std::ceil(static_cast<float>(num_data_elems) / 64.0f)) * 32u;
+            auto const grid_size = 1u;
+            return std::make_pair(grid_size, block_size);
+        }
+            break;
+    }
+}
+}
 }// Numeric::CUDA namespace.
