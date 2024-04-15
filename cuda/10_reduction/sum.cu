@@ -26,13 +26,11 @@ __global__ void sumKernelNaive(float const *data,
     }
 }
 
-__global__ void sumParallelSimple(float *data,
-                                  float *sum,
-                                  unsigned num_elems)
+__global__ void sumParallelSimple(float *data, float *sum)
 {
     auto const mem_loc = 2 * threadIdx.x;
 
-    for (auto stride = 1u; stride < num_elems; stride *= 2) {
+    for (auto stride = 1u; stride <= blockDim.x; stride *= 2) {
         if (threadIdx.x % stride == 0) {
             data[mem_loc] += data[mem_loc + stride];
         }
@@ -45,9 +43,7 @@ __global__ void sumParallelSimple(float *data,
 }
 
 // Kernel with reduced warp divergence.
-__global__ void sumParallelSimpleMinDiv(float *data,
-                                        float *sum,
-                                        unsigned num_elems)
+__global__ void sumParallelSimpleMinDiv(float *data, float *sum)
 {
     auto const mem_loc = threadIdx.x;
     for (auto stride = blockDim.x; stride >= 1u; stride /= 2) {
@@ -63,9 +59,7 @@ __global__ void sumParallelSimpleMinDiv(float *data,
 }
 
 // Kernel with reduced warp divergence and shared memory.
-__global__ void sumParallelSimpleMinDivShared(float const *data,
-                                              float *sum,
-                                              unsigned num_elems)
+__global__ void sumParallelSimpleMinDivShared(float const *data, float *sum)
 {
     // Copy the result of the first iteration to shared memory.
     extern __shared__ float partial_sum[];
@@ -84,9 +78,7 @@ __global__ void sumParallelSimpleMinDivShared(float const *data,
     }
 }
 
-__global__ void sumParallelSimpleMinDivSharedMultBlock(float const *data,
-                                                       float *sum,
-                                                       unsigned num_elems)
+__global__ void sumParallelSimpleMinDivSharedMultBlock(float const *data, float *sum)
 {
     // Copy the result of the first iteration to shared memory.
     extern __shared__ float partial_sum[];
@@ -152,29 +144,28 @@ float sumParallel(std::vector<float> const &data_host,
 
             case ReductionStrategy::SIMPLE: {
                 auto const [grid_size, block_size] = Detail::execConfig(num_elems, strategy);
-                sumParallelSimple<<<grid_size, block_size>>>(data_dev, sum_dev, num_elems);
+                sumParallelSimple<<<grid_size, block_size>>>(data_dev, sum_dev);
             }
                 break;
 
             case ReductionStrategy::SIMPLE_MIN_DIV: {
                 auto const [grid_size, block_size] = Detail::execConfig(num_elems, strategy);
-                sumParallelSimpleMinDiv<<<grid_size, block_size>>>(data_dev, sum_dev, num_elems);
+                sumParallelSimpleMinDiv<<<grid_size, block_size>>>(data_dev, sum_dev);
             }
                 break;
 
             case ReductionStrategy::SIMPLE_MIN_DIV_SHARED: {
                 auto const [grid_size, block_size] = Detail::execConfig(num_elems, strategy);
-                sumParallelSimpleMinDivShared<<<grid_size, block_size, block_size
-                    * sizeof(float)>>>(
-                    data_dev, sum_dev, num_elems);
-            }
+                auto const shared_mem_size = block_size * sizeof(float);
+                sumParallelSimpleMinDivShared<<<grid_size, block_size, shared_mem_size>>>(
+                    data_dev, sum_dev);            }
                 break;
 
             case ReductionStrategy::SIMPLE_MIN_DIV_SHARED_MULT_BLOCKS: {
                 auto const [grid_size, block_size] = Detail::execConfig(num_elems, strategy);
                 sumParallelSimpleMinDivSharedMultBlock<<<grid_size, block_size, block_size
                     * sizeof(float)>>>(
-                    data_dev, sum_dev, num_elems);
+                    data_dev, sum_dev);
             }
                 break;
         }
