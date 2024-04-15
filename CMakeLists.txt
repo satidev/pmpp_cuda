@@ -51,6 +51,8 @@ add_library(pmpp_cuda_lib
         cuda/09_histogram/histogram.cu
         cuda/10_reduction/sum.cuh
         cuda/10_reduction/sum.cu
+        cuda/utils/dev_vector.cuh
+        cuda/utils/dev_vector.cu
 )
 target_include_directories(pmpp_cuda_lib PRIVATE ${EIGEN3_INCLUDE_DIR})
 

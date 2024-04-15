@@ -4,6 +4,7 @@
 #include <stdexcept>
 #include <iostream>
 #include "../utils/check_error.cuh"
+#include "../utils/dev_vector.cuh"
 
 namespace Numeric::CUDA
 {
@@ -118,39 +119,26 @@ float sumParallel(std::vector<float> const &data_host,
         }
 
         auto const num_elems = std::size(data_host);
-        auto const data_size_bytes = num_elems * sizeof(float);
 
-        auto data_dev = static_cast<float *>(nullptr);
-        checkError(cudaMalloc(reinterpret_cast<void **>(&data_dev), data_size_bytes),
-                   "allocation of device buffer for data");
-        checkError(cudaMemcpy(data_dev,
-                              std::data(data_host),
-                              data_size_bytes,
-                              cudaMemcpyHostToDevice),
-                   "transfer of data from the host to the device");
-
-        auto sum_dev = static_cast<float *>(nullptr);
-        checkError(cudaMalloc(reinterpret_cast<void **>(&sum_dev), sizeof(float)),
-                   "allocation of device buffer for sum");
-        checkError(cudaMemset(sum_dev, 0, sizeof(float)),
-                   "initialization of sum buffer");
+        auto const data_dev =  DevVector{data_host};
+        auto sum_dev = DevVector{1u};
 
         switch (strategy) {
             case ReductionStrategy::NAIVE: {
                 auto const [grid_size, block_size] = Detail::execConfig(num_elems, strategy);
-                sumKernelNaive<<<grid_size, block_size>>>(data_dev, sum_dev, num_elems);
+                sumKernelNaive<<<grid_size, block_size>>>(data_dev.data(), sum_dev.data(), num_elems);
             }
                 break;
 
             case ReductionStrategy::SIMPLE: {
                 auto const [grid_size, block_size] = Detail::execConfig(num_elems, strategy);
-                sumParallelSimple<<<grid_size, block_size>>>(data_dev, sum_dev);
+                sumParallelSimple<<<grid_size, block_size>>>(data_dev.data(), sum_dev.data());
             }
                 break;
 
             case ReductionStrategy::SIMPLE_MIN_DIV: {
                 auto const [grid_size, block_size] = Detail::execConfig(num_elems, strategy);
-                sumParallelSimpleMinDiv<<<grid_size, block_size>>>(data_dev, sum_dev);
+                sumParallelSimpleMinDiv<<<grid_size, block_size>>>(data_dev.data(), sum_dev.data());
             }
                 break;
 
@@ -158,29 +146,24 @@ float sumParallel(std::vector<float> const &data_host,
                 auto const [grid_size, block_size] = Detail::execConfig(num_elems, strategy);
                 auto const shared_mem_size = block_size * sizeof(float);
                 sumParallelSimpleMinDivShared<<<grid_size, block_size, shared_mem_size>>>(
-                    data_dev, sum_dev);            }
+                    data_dev.data(), sum_dev.data());
+            }
                 break;
 
             case ReductionStrategy::SIMPLE_MIN_DIV_SHARED_MULT_BLOCKS: {
                 auto const [grid_size, block_size] = Detail::execConfig(num_elems, strategy);
                 sumParallelSimpleMinDivSharedMultBlock<<<grid_size, block_size, block_size
                     * sizeof(float)>>>(
-                    data_dev, sum_dev);
+                    data_dev.data(), sum_dev.data());
             }
                 break;
         }
         checkError(cudaGetLastError(), "launch of sum kernel");
 
-        auto sum_host = 0.0f;
-        checkError(cudaMemcpy(&sum_host, sum_dev, sizeof(float), cudaMemcpyDeviceToHost),
-                   "transfer of sum from the device to the host");
-
-        cudaFree(data_dev);
-        cudaFree(sum_dev);
-
-        return sum_host;
+        return sum_dev.hostCopy().front();
     }
 }
+
 namespace Detail
 {
 std::pair<unsigned, unsigned> execConfig(unsigned num_data_elems,
