@@ -11,7 +11,8 @@ namespace Numeric::CUDA
         SIMPLE,
         SIMPLE_MIN_DIV,
         SIMPLE_MIN_DIV_SHARED,
-        SIMPLE_MIN_DIV_SHARED_MULT_BLOCKS
+        SIMPLE_MIN_DIV_SHARED_MULT_BLOCKS,
+        SIMPLE_MIN_DIV_SHARED_MULT_BLOCKS_COARSE
     };
     float sumParallel(std::vector<float> const &data_host,
                       ReductionStrategy strategy = ReductionStrategy::SIMPLE);

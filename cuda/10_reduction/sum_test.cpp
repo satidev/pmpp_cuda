@@ -58,16 +58,15 @@ INSTANTIATE_TEST_SUITE_P(SumTest, SumSeqTestFixture,
 
 INSTANTIATE_TEST_SUITE_P(SumTest, SumParallelTestFixture,
                          ::testing::Values(
-                             std::make_tuple(0u, 1002.0, ReductionStrategy::SIMPLE),
-                             std::make_tuple(32u, 2.0, ReductionStrategy::SIMPLE),
-                             std::make_tuple(32u, 1.0, ReductionStrategy::SIMPLE),
-                             std::make_tuple(128u, 1.0, ReductionStrategy::SIMPLE),
-                             std::make_tuple(128u, 1.0, ReductionStrategy::SIMPLE_MIN_DIV),
-                             std::make_tuple(128u, 1.0, ReductionStrategy::SIMPLE_MIN_DIV_SHARED),
-                             std::make_tuple(128u, 1.0,
-                                             ReductionStrategy::SIMPLE_MIN_DIV_SHARED_MULT_BLOCKS),
-                             std::make_tuple(128u, 1.0, ReductionStrategy::NAIVE)
-
+                             std::make_tuple(0u, 1002.0, ReductionStrategy::SIMPLE)
+                             ,std::make_tuple(32u, 2.0, ReductionStrategy::NAIVE)
+                             ,std::make_tuple(32u, 2.0, ReductionStrategy::SIMPLE)
+                             ,std::make_tuple(32u, 1.0, ReductionStrategy::SIMPLE)
+                             ,std::make_tuple(512u, 1.0, ReductionStrategy::SIMPLE)
+                             ,std::make_tuple(128u, 1.0, ReductionStrategy::SIMPLE_MIN_DIV)
+                             ,std::make_tuple(512u, 1.0, ReductionStrategy::SIMPLE_MIN_DIV_SHARED)
+                             ,std::make_tuple(128u, 1.0, ReductionStrategy::SIMPLE_MIN_DIV_SHARED_MULT_BLOCKS)
+                             ,std::make_tuple(512u, 1.0, ReductionStrategy::SIMPLE_MIN_DIV_SHARED_MULT_BLOCKS_COARSE)
                          )
 );
 
