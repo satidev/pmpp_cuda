@@ -1,6 +1,6 @@
 #include <gmock/gmock.h>
 #include "conv_2d.cuh"
-#include "../../cpp/eigen_utils.h"
+#include "../utils/eigen_utils.h"
 
 TEST(conv2DTest, exceptionIsThrownSinceDataSizeIsZero)
 {

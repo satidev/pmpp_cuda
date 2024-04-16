@@ -1,8 +1,8 @@
 #ifndef MAT_MUL_CUH
 #define MAT_MUL_CUH
 
-#include "../cpp/eigen_utils.h"
-#include "../thirdparty/Eigen/Core"
+#include "../utils/eigen_utils.h"
+#include "Eigen/Core"
 
 namespace Numeric::CUDA
 {

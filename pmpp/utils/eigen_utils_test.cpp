@@ -1,6 +1,6 @@
 #include "eigen_utils.h"
 #include <gmock/gmock.h>
-#include <Eigen/Dense>
+#include "Eigen/Dense"
 
 TEST(EigenUtilsTest, matToVecCopy)
 {

@@ -2,7 +2,7 @@
 #define EIGEN_UTILS_H
 
 #include <vector>
-#include <Eigen/Dense>
+#include "Eigen/Dense"
 #include <iostream>
 #include <stdexcept>
 

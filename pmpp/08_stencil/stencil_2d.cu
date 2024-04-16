@@ -1,5 +1,5 @@
 #include "stencil_2d.cuh"
-#include "../../cpp/eigen_utils.h"
+#include "../utils/eigen_utils.h"
 #include <stdexcept>
 #include "../utils/check_error.cuh"
 

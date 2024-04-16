@@ -23,36 +23,36 @@ FetchContent_MakeAvailable(googletest)
 set(EIGEN3_INCLUDE_DIR "${CMAKE_CURRENT_SOURCE_DIR}/thirdparty")
 enable_testing()
 add_library(pmpp_cuda_lib
-        cpp/vec_add.h
-        cpp/vec_add.cpp
-        cuda/02_vec_add/vec_add.cu
-        cuda/02_vec_add/vec_add.cuh
-        cpp/eigen_utils.h
-        cuda/mat_mul.cuh
-        cuda/mat_mul.cu
-        cuda/utils/dev_config.cuh
-        cuda/utils/dev_config.cu
-        cpp/host_timer.h
-        cpp/host_timer.cpp
-        cuda/utils/exec_config.cuh
-        cuda/07_convolution/conv_1d.cuh
-        cuda/07_convolution/conv_1d.cu
-        cuda/utils/check_error.cuh
-        cuda/utils/check_error.cu
-        cuda/utils/timer.cuh
-        cuda/utils/timer.cu
-        cuda/08_stencil/stencil_1d.cuh
-        cuda/08_stencil/stencil_1d.cu
-        cuda/08_stencil/stencil_2d.cuh
-        cuda/08_stencil/stencil_2d.cu
-        cuda/07_convolution/conv_2d.cuh
-        cuda/07_convolution/conv_2d.cu
-        cuda/09_histogram/histogram.cuh
-        cuda/09_histogram/histogram.cu
-        cuda/10_reduction/sum.cuh
-        cuda/10_reduction/sum.cu
-        cuda/utils/dev_vector.cuh
-        cuda/utils/dev_vector.cu
+        pmpp/02_vec_add/vec_add.h
+        pmpp/02_vec_add/vec_add.cpp
+        pmpp/02_vec_add/vec_add.cu
+        pmpp/02_vec_add/vec_add.cuh
+        pmpp/utils/eigen_utils.h
+        pmpp/03_05_06_mat_mul/mat_mul.cuh
+        pmpp/03_05_06_mat_mul/mat_mul.cu
+        pmpp/utils/dev_config.cuh
+        pmpp/utils/dev_config.cu
+        pmpp/utils/host_timer.h
+        pmpp/utils/host_timer.cpp
+        pmpp/utils/exec_config.cuh
+        pmpp/07_convolution/conv_1d.cuh
+        pmpp/07_convolution/conv_1d.cu
+        pmpp/utils/check_error.cuh
+        pmpp/utils/check_error.cu
+        pmpp/utils/timer.cuh
+        pmpp/utils/timer.cu
+        pmpp/08_stencil/stencil_1d.cuh
+        pmpp/08_stencil/stencil_1d.cu
+        pmpp/08_stencil/stencil_2d.cuh
+        pmpp/08_stencil/stencil_2d.cu
+        pmpp/07_convolution/conv_2d.cuh
+        pmpp/07_convolution/conv_2d.cu
+        pmpp/09_histogram/histogram.cuh
+        pmpp/09_histogram/histogram.cu
+        pmpp/10_reduction/sum.cuh
+        pmpp/10_reduction/sum.cu
+        pmpp/utils/dev_vector.cuh
+        pmpp/utils/dev_vector.cu
 )
 target_include_directories(pmpp_cuda_lib PRIVATE ${EIGEN3_INCLUDE_DIR})
 
@@ -69,16 +69,16 @@ target_include_directories(pmpp_cuda PRIVATE ${EIGEN3_INCLUDE_DIR})
 
 
 add_executable(pmpp_cuda_test main_test.cpp
-        cpp/vec_add_test.cpp
-        cuda/02_vec_add/vec_add_cuda_test.cpp
-        cpp/eigen_utils_test.cpp
-        cuda/mat_mul_cuda_test.cpp
-        cuda/07_convolution/conv_1d_test.cpp
-        cuda/08_stencil/stencil_1d_test.cpp
-        cuda/08_stencil/stencil_2d_test.cpp
-        cuda/07_convolution/conv_2d_test.cpp
-        cuda/09_histogram/histogram_test.cpp
-        cuda/10_reduction/sum_test.cpp
+        pmpp/02_vec_add/vec_add_test.cpp
+        pmpp/02_vec_add/vec_add_cuda_test.cpp
+        pmpp/utils/eigen_utils_test.cpp
+        pmpp/03_05_06_mat_mul/mat_mul_cuda_test.cpp
+        pmpp/07_convolution/conv_1d_test.cpp
+        pmpp/08_stencil/stencil_1d_test.cpp
+        pmpp/08_stencil/stencil_2d_test.cpp
+        pmpp/07_convolution/conv_2d_test.cpp
+        pmpp/09_histogram/histogram_test.cpp
+        pmpp/10_reduction/sum_test.cpp
 )
 set_target_properties(pmpp_cuda_test PROPERTIES CUDA_SEPARABLE_COMPILATION OFF)
 target_compile_options(pmpp_cuda_test PRIVATE $<$<COMPILE_LANGUAGE:CUDA>:

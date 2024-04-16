@@ -2,8 +2,8 @@
 #define EXEC_CONFIG_CUH
 
 #include "dev_config.cuh"
-#include "../../../../../../../usr/include/c++/11/array"
-#include "../../../../../../../usr/include/c++/11/iostream"
+#include "array"
+#include "iostream"
 
 // Computes the execution configuration parameters for kernel launch taking account
 // of the device properties and the problem size.
