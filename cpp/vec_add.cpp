@@ -8,18 +8,14 @@ namespace Numeric
 std::vector<float> vecAdd(std::vector<float> const &first,
                           std::vector<float> const &sec)
 {
-    if (first.size() != sec.size()) {
+    if (std::size(first) != std::size(sec)) {
         throw std::invalid_argument{"Size should be equal"};
     }
     auto res = std::vector<float>{};
     res.reserve(first.size());
 
     std::transform(std::begin(first), std::end(first), std::begin(sec),
-                   std::back_inserter(res), [](float a, float b)
-                   {
-                       return a + b;
-                   }
-    );
+                   std::back_inserter(res), std::plus<float>{});
     return res;
 }
 
