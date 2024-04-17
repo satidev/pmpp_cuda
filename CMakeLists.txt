@@ -53,6 +53,10 @@ add_library(pmpp_cuda_lib
         pmpp/10_reduction/sum.cu
         pmpp/utils/dev_vector.cuh
         pmpp/utils/dev_vector.cu
+        pmpp/11_scan/cum_sum_host.h
+        pmpp/11_scan/cum_sum_host.cpp
+        pmpp/11_scan/cum_sum_dev.cuh
+        pmpp/11_scan/cum_sum_dev.cu
 )
 target_include_directories(pmpp_cuda_lib PRIVATE ${EIGEN3_INCLUDE_DIR})
 
@@ -79,6 +83,8 @@ add_executable(pmpp_cuda_test main_test.cpp
         pmpp/07_convolution/conv_2d_test.cpp
         pmpp/09_histogram/histogram_test.cpp
         pmpp/10_reduction/sum_test.cpp
+        pmpp/11_scan/cum_sum_host_test.cpp
+        pmpp/11_scan/cum_sum_dev_test.cu
 )
 set_target_properties(pmpp_cuda_test PROPERTIES CUDA_SEPARABLE_COMPILATION OFF)
 target_compile_options(pmpp_cuda_test PRIVATE $<$<COMPILE_LANGUAGE:CUDA>:
