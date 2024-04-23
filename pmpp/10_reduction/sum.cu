@@ -149,7 +149,7 @@ float sumParallel(std::vector<float> const &data_host,
         auto const num_elems = std::size(data_host);
 
         auto const data_dev = DevVector{data_host};
-        auto sum_dev = DevVector{1u, 0u};
+        auto sum_dev = DevVector<float>{1u, 0u};
 
         switch (strategy) {
             case ReductionStrategy::NAIVE: {

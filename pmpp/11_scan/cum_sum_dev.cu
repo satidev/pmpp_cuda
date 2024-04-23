@@ -53,7 +53,7 @@ std::vector<float> cumSumDev(std::vector<float> const &vec,
 
     auto const vec_dev = DevVector{vec};
     auto const num_elems = static_cast<unsigned>(std::size(vec));
-    auto res_dev = DevVector{num_elems};
+    auto res_dev = DevVector<float>{num_elems};
 
     auto const block_size = num_elems;
     auto const grid_size = 1u;

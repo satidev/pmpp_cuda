@@ -33,7 +33,7 @@ std::vector<float> vecAdd(std::vector<float> const &first_host,
 
     // Allocate result vector in the device.
     auto const num_elems{static_cast<unsigned>(std::size(first_host))};
-    auto res_dev{DevVector{num_elems}};
+    auto res_dev{DevVector<float>{num_elems}};
 
     // Execute the kernel.
     auto const exec_params{ExecConfig::getParams(num_elems, vecAddKernel, 0u)};
