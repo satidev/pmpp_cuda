@@ -52,14 +52,17 @@ add_library(pmpp_cuda_lib
         pmpp/10_reduction/sum.cuh
         pmpp/10_reduction/sum.cu
         pmpp/utils/dev_vector.cuh
-        pmpp/utils/dev_vector.cu
         pmpp/11_scan/cum_sum_host.h
         pmpp/11_scan/cum_sum_host.cpp
         pmpp/11_scan/cum_sum_dev.cuh
         pmpp/11_scan/cum_sum_dev.cu
+        pmpp/03_color_gray_scale/color_gray_scale.cuh
+        pmpp/03_color_gray_scale/color_gray_scale.cu
 )
+find_package(OpenCV REQUIRED)
+include_directories(${OpenCV_INCLUDE_DIRS})
 target_include_directories(pmpp_cuda_lib PRIVATE ${EIGEN3_INCLUDE_DIR})
-
+target_link_libraries(pmpp_cuda_lib ${OpenCV_LIBS})
 
 add_executable(pmpp_cuda main.cu)
 set_target_properties(pmpp_cuda PROPERTIES CUDA_SEPARABLE_COMPILATION OFF)
