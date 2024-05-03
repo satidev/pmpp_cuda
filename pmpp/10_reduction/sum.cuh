@@ -3,7 +3,7 @@
 
 #include <vector>
 
-namespace Numeric::CUDA
+namespace PMPP::CUDA
 {
     float sumSeq(std::vector<float> const &data);
     enum class ReductionStrategy {

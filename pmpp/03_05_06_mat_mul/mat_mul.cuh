@@ -4,7 +4,7 @@
 #include "../utils/eigen_utils.h"
 #include "Eigen/Core"
 
-namespace Numeric::CUDA
+namespace PMPP::CUDA
 {
 Eigen::MatrixXf matMul(Eigen::MatrixXf const &a,
                        Eigen::MatrixXf const &b,

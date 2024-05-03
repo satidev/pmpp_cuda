@@ -3,7 +3,7 @@
 
 #include "Eigen/Core"
 
-namespace Numeric::CUDA
+namespace PMPP::CUDA
 {
 Eigen::MatrixXf conv2D(Eigen::MatrixXf const &data,
                        Eigen::MatrixXf const &filter,

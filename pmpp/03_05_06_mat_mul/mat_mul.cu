@@ -1,7 +1,7 @@
 #include "mat_mul.cuh"
 #include "../utils/dev_config.cuh"
 
-namespace Numeric::CUDA
+namespace PMPP::CUDA
 {
 __global__ void mat_mul(float const *a, float const *b, float *res,
                         unsigned num_rows_a, unsigned num_cols_a,

@@ -3,7 +3,7 @@
 
 #include <vector>
 
-namespace Numeric::CUDA
+namespace PMPP::CUDA
 {
 std::vector<float> conv1D(std::vector<float> const &data,
                           std::vector<float> const &filter,

@@ -3,7 +3,7 @@
 
 #include <vector>
 
-namespace Numeric
+namespace PMPP
 {
 std::vector<float> vecAdd(std::vector<float> const &first,
                           std::vector<float> const &sec);

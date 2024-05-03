@@ -3,7 +3,7 @@
 
 #include "Eigen/Core"
 
-namespace Numeric::CUDA
+namespace PMPP::CUDA
 {
 // Sum of pixel and 4 nearest neighbors.
 Eigen::MatrixXf sum5PointStencil(Eigen::MatrixXf const &ip_mat,

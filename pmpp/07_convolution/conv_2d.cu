@@ -1,7 +1,7 @@
 #include "conv_2d.cuh"
 #include "../utils/eigen_utils.h"
 
-namespace Numeric::CUDA
+namespace PMPP::CUDA
 {
 __global__ void conv_kern_2d(float const *data,
                              float const *filter,

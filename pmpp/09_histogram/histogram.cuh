@@ -3,7 +3,7 @@
 
 #include <vector>
 
-namespace Numeric::CUDA
+namespace PMPP::CUDA
 {
 std::vector<unsigned> histogram(std::vector<bool> const &data_host);
 std::vector<unsigned> histogramPrivatization(std::vector<bool> const &data_host);

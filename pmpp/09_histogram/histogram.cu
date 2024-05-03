@@ -2,7 +2,7 @@
 #include "../utils/check_error.cuh"
 #include "../utils/exec_config.cuh"
 
-namespace Numeric::CUDA
+namespace PMPP::CUDA
 {
 __global__ void hist_kern(unsigned short const *data,
                           unsigned *hist,

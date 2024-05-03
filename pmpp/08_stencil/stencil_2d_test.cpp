@@ -3,7 +3,7 @@
 #include "../utils/eigen_utils.h"
 #include <stdexcept>
 
-using namespace Numeric::CUDA;
+using namespace PMPP::CUDA;
 using namespace Eigen;
 
 TEST(cudaStencil2DTest, exceptionIsThrownInvalidMatrixSize)

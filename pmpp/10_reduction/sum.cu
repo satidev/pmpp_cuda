@@ -6,7 +6,7 @@
 #include "../utils/check_error.cuh"
 #include "../utils/dev_vector.cuh"
 
-namespace Numeric::CUDA
+namespace PMPP::CUDA
 {
 float sumSeq(std::vector<float> const &data)
 {

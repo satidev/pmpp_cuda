@@ -3,7 +3,7 @@
 
 #include <vector>
 
-namespace Numeric::CUDA
+namespace PMPP::CUDA
 {
     // Finite difference, 3-point stencil pattern.
     std::vector<float> diff(std::vector<float> const &ip_vec);

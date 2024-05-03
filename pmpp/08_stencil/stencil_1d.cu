@@ -2,7 +2,7 @@
 #include "../utils/exec_config.cuh"
 #include "../utils/check_error.cuh"
 
-namespace Numeric::CUDA
+namespace PMPP::CUDA
 {
 
 __global__ void diff_kernel(float const *ip, float *op,

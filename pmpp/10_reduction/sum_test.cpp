@@ -1,7 +1,7 @@
 #include <gmock/gmock.h>
 #include "sum.cuh"
 
-using namespace Numeric::CUDA;
+using namespace PMPP::CUDA;
 
 class SumSeqTestFixture:
     public ::testing::Test,

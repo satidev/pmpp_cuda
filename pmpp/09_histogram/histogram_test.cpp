@@ -1,7 +1,7 @@
 #include <gmock/gmock.h>
 #include "histogram.cuh"
 
-using namespace Numeric::CUDA;
+using namespace PMPP::CUDA;
 
 TEST(histTest, emptyVectorOutputWhenInputIsEmpty)
 {

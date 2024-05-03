@@ -3,7 +3,7 @@
 #include <stdexcept>
 #include "../utils/check_error.cuh"
 
-namespace Numeric::CUDA
+namespace PMPP::CUDA
 {
 
 __host__ __device__ unsigned elemIndex(unsigned row, unsigned col, unsigned num_cols)

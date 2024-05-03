@@ -2,7 +2,7 @@
 #include "../utils/exec_config.cuh"
 #include <stdexcept>
 
-namespace Numeric::CUDA
+namespace PMPP::CUDA
 {
 __global__ void conv_kern_1d(float const *data,
                              float const *filter,
