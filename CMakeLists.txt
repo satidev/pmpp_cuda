@@ -20,27 +20,25 @@ set(gtest_force_shared_crt ON CACHE BOOL "" FORCE)
 FetchContent_MakeAvailable(googletest)
 add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/external/dlib)
 
-set(EIGEN3_INCLUDE_DIR "${CMAKE_CURRENT_SOURCE_DIR}/thirdparty")
 enable_testing()
 add_library(pmpp_cuda_lib
         pmpp/02_vec_add/vec_add.h
         pmpp/02_vec_add/vec_add.cpp
         pmpp/02_vec_add/vec_add.cu
         pmpp/02_vec_add/vec_add.cuh
-        pmpp/utils/eigen_utils.h
         pmpp/03_05_06_mat_mul/mat_mul.cuh
         pmpp/03_05_06_mat_mul/mat_mul.cu
-        pmpp/utils/dev_config.cuh
-        pmpp/utils/dev_config.cu
-        pmpp/utils/host_timer.h
-        pmpp/utils/host_timer.cpp
-        pmpp/utils/exec_config.cuh
+        utils/dev_config.cuh
+        utils/dev_config.cu
+        utils/host_timer.h
+        utils/host_timer.cpp
+        utils/exec_config.cuh
         pmpp/07_convolution/conv_1d.cuh
         pmpp/07_convolution/conv_1d.cu
-        pmpp/utils/check_error.cuh
-        pmpp/utils/check_error.cu
-        pmpp/utils/dev_timer.cuh
-        pmpp/utils/dev_timer.cu
+        utils/check_error.cuh
+        utils/check_error.cu
+        utils/dev_timer.cuh
+        utils/dev_timer.cu
         pmpp/08_stencil/stencil_1d.cuh
         pmpp/08_stencil/stencil_1d.cu
         pmpp/08_stencil/stencil_2d.cuh
@@ -51,7 +49,7 @@ add_library(pmpp_cuda_lib
         pmpp/09_histogram/histogram.cu
         pmpp/10_reduction/sum.cuh
         pmpp/10_reduction/sum.cu
-        pmpp/utils/dev_vector.cuh
+        utils/dev_vector.cuh
         pmpp/11_scan/cum_sum_host.h
         pmpp/11_scan/cum_sum_host.cpp
         pmpp/11_scan/cum_sum_dev.cuh
@@ -63,11 +61,11 @@ add_library(pmpp_cuda_lib
         pmpp/03_05_06_mat_mul/mat_mul_cublas.cuh
         pmpp/03_05_06_mat_mul/mat_mul_tiled.cuh
         pmpp/03_05_06_mat_mul/sq_mat_mul_tiled_static_sm.cuh
-        pmpp/utils/perf.cuh
+        utils/perf.cuh
         pmpp/03_05_06_mat_mul/sq_mat_mul_tiled_dynamic_sm.cuh
-        pmpp/utils/dev_vector_factory.cuh
-        pmpp/utils/host_dev_copy.cuh
-        pmpp/utils/dlib_utils.cuh
+        utils/dev_vector_factory.cuh
+        utils/host_dev_copy.cuh
+        utils/dlib_utils.cuh
         best_practices_nvidia/mem_optim/copy_execute_latency.cuh
         best_practices_nvidia/mem_optim/mem_bandwidth.cuh
         best_practices_nvidia/mem_optim/mem_bandwidth.cu
@@ -78,9 +76,7 @@ add_library(pmpp_cuda_lib
         best_practices_nvidia/mat_transpose/trans_impl_naive.cuh
         best_practices_nvidia/mat_transpose/trans_impl_sm.cuh
         best_practices_nvidia/mat_transpose/trans_impl_sm_no_bank_conflict.cuh
-
 )
-target_include_directories(pmpp_cuda_lib PRIVATE ${EIGEN3_INCLUDE_DIR})
 target_include_directories(pmpp_cuda_lib PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/external)
 target_link_libraries(pmpp_cuda_lib cublas)
 target_link_libraries(pmpp_cuda_lib dlib)
@@ -94,13 +90,10 @@ target_compile_options(pmpp_cuda PRIVATE $<$<COMPILE_LANGUAGE:CUDA>:
         --expt-relaxed-constexpr
         -ftemplate-backtrace-limit=0 >)
 target_link_libraries(pmpp_cuda pmpp_cuda_lib)
-target_include_directories(pmpp_cuda PRIVATE ${EIGEN3_INCLUDE_DIR})
-
 
 add_executable(pmpp_cuda_test main_test.cpp
         pmpp/02_vec_add/vec_add_test.cpp
         pmpp/02_vec_add/vec_add_cuda_test.cpp
-        pmpp/utils/eigen_utils_test.cpp
         pmpp/07_convolution/conv_1d_test.cpp
         pmpp/08_stencil/stencil_1d_test.cpp
         pmpp/08_stencil/stencil_2d_test.cpp
@@ -118,6 +111,5 @@ target_compile_options(pmpp_cuda_test PRIVATE $<$<COMPILE_LANGUAGE:CUDA>:
 )
 target_link_libraries(pmpp_cuda_test pmpp_cuda_lib)
 target_link_libraries(pmpp_cuda_test GTest::gtest_main GTest::gmock_main)
-target_include_directories(pmpp_cuda_test PRIVATE ${EIGEN3_INCLUDE_DIR})
 include(GoogleTest)
 gtest_discover_tests(pmpp_cuda_test)

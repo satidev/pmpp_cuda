@@ -1,5 +1,6 @@
 #include "conv_2d.cuh"
-#include "../utils/eigen_utils.h"
+/*
+
 
 namespace PMPP::CUDA
 {
@@ -191,3 +192,4 @@ Eigen::MatrixXf conv2D(Eigen::MatrixXf const &data,
     return EigenUtils::toMat<float>(res_vec, data.rows(), data.cols());
 }
 }// Numeric::CUDA namespace.
+*/

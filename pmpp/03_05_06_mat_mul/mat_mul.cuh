@@ -3,13 +3,13 @@
 
 #include <memory>
 #include "mat_mul_impl.cuh"
-#include "../utils/dev_config.cuh"
-#include "../utils/dev_vector.cuh"
+#include "../../utils/dev_config.cuh"
+#include "../../utils/dev_vector.cuh"
 #include <stdexcept>
-#include "../utils/dev_timer.cuh"
+#include "../../utils/dev_timer.cuh"
 #include <tuple>
-#include "../utils/perf.cuh"
-#include "../utils/dev_vector_factory.cuh"
+#include "../../utils/perf.cuh"
+#include "../../utils/dev_vector_factory.cuh"
 #include <dlib/matrix.h>
 
 namespace PMPP::CUDA

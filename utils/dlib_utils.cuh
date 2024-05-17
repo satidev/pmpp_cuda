@@ -1,8 +1,7 @@
 #ifndef DLIB_UTILS_CUH
 #define DLIB_UTILS_CUH
 
-#include <dlib/matrix.h>
-
+#include "dlib/matrix.h"
 
 namespace DlibUtils
 {

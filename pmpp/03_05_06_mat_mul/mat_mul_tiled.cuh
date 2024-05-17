@@ -2,8 +2,8 @@
 #define MAT_MUL_TILED_CUH
 
 #include "mat_mul_impl.cuh"
-#include "../utils/check_error.cuh"
-#include "../utils/dev_config.cuh"
+#include "../../utils/check_error.cuh"
+#include "../../utils/dev_config.cuh"
 #include <stdexcept>
 
 namespace PMPP::CUDA

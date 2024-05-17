@@ -2,7 +2,7 @@
 #define TRANS_IMPL_SM_CUH
 
 #include "trans_impl_strategy.cuh"
-#include "../../pmpp/utils/check_error.cuh"
+#include "../../utils/check_error.cuh"
 
 namespace BPNV
 {

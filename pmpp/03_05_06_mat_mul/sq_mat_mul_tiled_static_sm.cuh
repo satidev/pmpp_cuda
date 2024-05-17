@@ -2,7 +2,7 @@
 #define SQ_MAT_MUL_TILED_STATIC_SM_CUH
 
 #include "mat_mul_impl.cuh"
-#include "../utils/dev_config.cuh"
+#include "../../utils/dev_config.cuh"
 #include <stdexcept>
 
 namespace PMPP::CUDA

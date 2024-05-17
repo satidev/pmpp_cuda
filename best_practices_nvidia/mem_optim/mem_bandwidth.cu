@@ -1,7 +1,7 @@
 #include <chrono>
 #include "mem_bandwidth.cuh"
-#include "../../pmpp/utils/check_error.cuh"
-#include "../../pmpp/utils/dev_timer.cuh"
+#include "../../utils/check_error.cuh"
+#include "../../utils/dev_timer.cuh"
 #include <iostream>
 #include <vector>
 

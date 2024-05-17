@@ -1,6 +1,6 @@
 #ifndef STENCIL_2D_CUH
 #define STENCIL_2D_CUH
-
+/*
 #include "Eigen/Core"
 
 namespace PMPP::CUDA
@@ -9,7 +9,7 @@ namespace PMPP::CUDA
 Eigen::MatrixXf sum5PointStencil(Eigen::MatrixXf const &ip_mat,
                                   bool use_shared_mem = false);
 }// Numeric::CUDA namespace.
-
+*/
 #endif //STENCIL_2D_CUH
 
 

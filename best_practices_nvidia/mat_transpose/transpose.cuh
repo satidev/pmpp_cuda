@@ -3,12 +3,12 @@
 
 #include <dlib/matrix.h>
 #include "trans_impl_strategy.cuh"
-#include "../../pmpp/utils/dev_vector_factory.cuh"
-#include "../../pmpp/utils/dev_timer.cuh"
-#include "../../pmpp/utils/perf.cuh"
+#include "../../utils/dev_vector_factory.cuh"
+#include "../../utils/dev_timer.cuh"
+#include "../../utils/perf.cuh"
 #include <memory>
 #include <tuple>
-#include "../../pmpp/utils/dev_config.cuh"
+#include "../../utils/dev_config.cuh"
 
 namespace BPNV
 {

@@ -7,7 +7,7 @@
 #include <memory>
 #include "sq_mat_mul_tiled_static_sm.cuh"
 #include "sq_mat_mul_tiled_dynamic_sm.cuh"
-#include "../utils/dlib_utils.cuh"
+#include "../../utils/dlib_utils.cuh"
 
 using namespace PMPP::CUDA;
 

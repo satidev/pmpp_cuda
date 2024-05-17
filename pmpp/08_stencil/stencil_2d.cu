@@ -1,5 +1,6 @@
+/*
 #include "stencil_2d.cuh"
-#include "../utils/eigen_utils.h"
+
 #include <stdexcept>
 #include "../utils/check_error.cuh"
 
@@ -155,3 +156,4 @@ Eigen::MatrixXf sum5PointStencil(Eigen::MatrixXf const &ip_mat,
 }
 
 }// Numeric::CUDA namespace.
+*/

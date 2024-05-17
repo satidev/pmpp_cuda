@@ -1,8 +1,8 @@
 #include <iostream>
 #include "pmpp/07_convolution/conv_1d.cuh"
-#include "pmpp/utils/dev_config.cuh"
-#include "pmpp/utils/exec_config.cuh"
-#include "pmpp/utils/host_timer.h"
+#include "utils/dev_config.cuh"
+#include "utils/exec_config.cuh"
+#include "utils/host_timer.h"
 #include "pmpp/08_stencil/stencil_1d.cuh"
 #include "pmpp/03_color_gray_scale/color_gray_scale.cuh"
 #include "pmpp/03_05_06_mat_mul/mat_mul.cuh"

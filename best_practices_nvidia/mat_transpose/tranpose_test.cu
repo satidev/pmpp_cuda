@@ -3,7 +3,7 @@
 #include "trans_impl_naive.cuh"
 #include "trans_impl_sm.cuh"
 #include "trans_impl_sm_no_bank_conflict.cuh"
-#include "../../pmpp/utils/dlib_utils.cuh"
+#include "../../utils/dlib_utils.cuh"
 
 using namespace BPNV;
 

@@ -1,8 +1,8 @@
 #include <numeric>
 #include "copy_execute_latency.cuh"
-#include "../../pmpp/utils/dev_timer.cuh"
-#include "../../pmpp/utils/check_error.cuh"
-#include "../../pmpp/utils/exec_config.cuh"
+#include "../../utils/dev_timer.cuh"
+#include "../../utils/check_error.cuh"
+#include "../../utils/exec_config.cuh"
 
 namespace CopyExecuteLatency
 {

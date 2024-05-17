@@ -2,7 +2,7 @@
 #define MAT_MUL_NAIVE_CUH
 
 #include "mat_mul_impl.cuh"
-#include "../utils/check_error.cuh"
+#include "../../utils/check_error.cuh"
 
 namespace PMPP::CUDA
 {

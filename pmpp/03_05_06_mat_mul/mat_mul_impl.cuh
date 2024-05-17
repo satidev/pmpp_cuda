@@ -1,8 +1,7 @@
 #ifndef MAT_MUL_IMPL_CUH
 #define MAT_MUL_IMPL_CUH
 
-#include <Eigen/Core>
-#include "../utils/dev_timer.cuh"
+#include "../../utils/dev_timer.cuh"
 
 namespace PMPP::CUDA
 {

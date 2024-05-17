@@ -2,9 +2,9 @@
 #define SQ_MAT_MUL_TILED_DYNAMIC_SM_CUH
 
 #include "mat_mul_impl.cuh"
-#include "../utils/dev_config.cuh"
+#include "../../utils/dev_config.cuh"
 #include <stdexcept>
-#include "../utils/check_error.cuh"
+#include "../../utils/check_error.cuh"
 
 
 namespace PMPP::CUDA
