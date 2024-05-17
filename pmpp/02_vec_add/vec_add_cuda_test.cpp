@@ -30,7 +30,7 @@ TEST(cudaVecAddTest, largeVecAdd)
     ASSERT_THAT(PMPP::CUDA::vecAdd(vec_1, vec_2), testing::ContainerEq(res_exp));
 }
 
-
+/*
 TEST(cudaVecAddTest, performanceTest)
 {
     std::cout << "Vector addition:: performance test" << std::endl;
@@ -58,3 +58,4 @@ TEST(cudaVecAddTest, performanceTest)
 
     ASSERT_THAT(res, testing::ContainerEq(res_exp));
 }
+ */

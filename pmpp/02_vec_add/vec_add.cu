@@ -2,9 +2,11 @@
 #include "../utils/exec_config.cuh"
 #include <stdexcept>
 #include "../utils/check_error.cuh"
-#include "../utils/timer.cuh"
+#include "../utils/dev_timer.cuh"
 #include "../utils/dev_vector.cuh"
 #include "cuda_profiler_api.h"
+#include "../utils/dev_vector_factory.cuh"
+#include "../utils/host_dev_copy.cuh"
 
 namespace PMPP::CUDA
 {
@@ -29,8 +31,8 @@ std::vector<float> vecAdd(std::vector<float> const &first_host,
     }
 
     // Allocate device vectors and transfer input data.
-    auto first_dev{DevVector{first_host}};
-    auto sec_dev{DevVector{sec_host}};
+    auto first_dev = DevVectorFactory::create(first_host);
+    auto sec_dev = DevVectorFactory::create(sec_host);
 
     // Allocate result vector in the device.
     auto const num_elems{static_cast<unsigned>(std::size(first_host))};
@@ -38,7 +40,7 @@ std::vector<float> vecAdd(std::vector<float> const &first_host,
 
     // Execute the kernel.
     auto const exec_params{ExecConfig::getParams(num_elems, vecAddKernel, 0u)};
-    auto timer{Timer{}};
+    auto timer{DevTimer{}};
     timer.tic();
 
     //cudaProfilerStart();
@@ -52,14 +54,12 @@ std::vector<float> vecAdd(std::vector<float> const &first_host,
         std::cout << "Time taken (kernel:vec_add):: " << time_taken_sec * 1000.0 << " milli seconds." << std::endl;
     }
 
-    return res_dev.hostCopy();
+    return HostDevCopy::hostCopy(res_dev);
 }
 
 void vecAddExample()
 {
     auto const dev_prop = DeviceConfigSingleton::getInstance().getDevProps(0);
-    auto const max_num_block_sm = dev_prop.max_blocks_per_sm;
-    auto const max_num_thread_per_block = dev_prop.max_threads_per_block;
     auto const max_num_thread_sm = dev_prop.max_threads_per_sm;
     auto const num_sm = dev_prop.num_sm;
 

@@ -7,5 +7,5 @@ void HostTimer::tic()
 float HostTimer::toc()
 {
     end = std::chrono::high_resolution_clock::now();
-    return std::chrono::duration<float>{end - start}.count();
+    return std::chrono::duration<float>{end - start}.count()/1e9;
 }

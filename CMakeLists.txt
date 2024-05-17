@@ -9,7 +9,7 @@ if (UNIX)
 endif ()
 
 project(pmpp_cuda CXX CUDA)
-set(CMAKE_CXX_STANDARD 17)
+set(CMAKE_CXX_STANDARD 20)
 include(FetchContent)
 FetchContent_Declare(
         googletest
@@ -18,7 +18,7 @@ FetchContent_Declare(
 # For Windows: Prevent overriding the parent project's compiler/linker settings
 set(gtest_force_shared_crt ON CACHE BOOL "" FORCE)
 FetchContent_MakeAvailable(googletest)
-
+add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/external/dlib)
 
 set(EIGEN3_INCLUDE_DIR "${CMAKE_CURRENT_SOURCE_DIR}/thirdparty")
 enable_testing()
@@ -39,8 +39,8 @@ add_library(pmpp_cuda_lib
         pmpp/07_convolution/conv_1d.cu
         pmpp/utils/check_error.cuh
         pmpp/utils/check_error.cu
-        pmpp/utils/timer.cuh
-        pmpp/utils/timer.cu
+        pmpp/utils/dev_timer.cuh
+        pmpp/utils/dev_timer.cu
         pmpp/08_stencil/stencil_1d.cuh
         pmpp/08_stencil/stencil_1d.cu
         pmpp/08_stencil/stencil_2d.cuh
@@ -58,13 +58,35 @@ add_library(pmpp_cuda_lib
         pmpp/11_scan/cum_sum_dev.cu
         pmpp/03_color_gray_scale/color_gray_scale.cuh
         pmpp/03_color_gray_scale/color_gray_scale.cu
-)
-find_package(OpenCV REQUIRED)
-include_directories(${OpenCV_INCLUDE_DIRS})
-target_include_directories(pmpp_cuda_lib PRIVATE ${EIGEN3_INCLUDE_DIR})
-target_link_libraries(pmpp_cuda_lib ${OpenCV_LIBS})
+        pmpp/03_05_06_mat_mul/mat_mul_naive.cuh
+        pmpp/03_05_06_mat_mul/mat_mul_impl.cuh
+        pmpp/03_05_06_mat_mul/mat_mul_cublas.cuh
+        pmpp/03_05_06_mat_mul/mat_mul_tiled.cuh
+        pmpp/03_05_06_mat_mul/sq_mat_mul_tiled_static_sm.cuh
+        pmpp/utils/perf.cuh
+        pmpp/03_05_06_mat_mul/sq_mat_mul_tiled_dynamic_sm.cuh
+        pmpp/utils/dev_vector_factory.cuh
+        pmpp/utils/host_dev_copy.cuh
+        pmpp/utils/dlib_utils.cuh
+        best_practices_nvidia/mem_optim/copy_execute_latency.cuh
+        best_practices_nvidia/mem_optim/mem_bandwidth.cuh
+        best_practices_nvidia/mem_optim/mem_bandwidth.cu
+        best_practices_nvidia/mem_optim/copy_execute_latency.cu
+        best_practices_nvidia/mat_transpose/transpose.cuh
+        best_practices_nvidia/mat_transpose/transpose.cu
+        best_practices_nvidia/mat_transpose/trans_impl_strategy.cuh
+        best_practices_nvidia/mat_transpose/trans_impl_naive.cuh
+        best_practices_nvidia/mat_transpose/trans_impl_sm.cuh
+        best_practices_nvidia/mat_transpose/trans_impl_sm_no_bank_conflict.cuh
 
-add_executable(pmpp_cuda main.cu)
+)
+target_include_directories(pmpp_cuda_lib PRIVATE ${EIGEN3_INCLUDE_DIR})
+target_include_directories(pmpp_cuda_lib PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/external)
+target_link_libraries(pmpp_cuda_lib cublas)
+target_link_libraries(pmpp_cuda_lib dlib)
+add_executable(pmpp_cuda main.cu
+
+)
 set_target_properties(pmpp_cuda PROPERTIES CUDA_SEPARABLE_COMPILATION OFF)
 target_compile_options(pmpp_cuda PRIVATE $<$<COMPILE_LANGUAGE:CUDA>:
         --generate-line-info
@@ -79,7 +101,6 @@ add_executable(pmpp_cuda_test main_test.cpp
         pmpp/02_vec_add/vec_add_test.cpp
         pmpp/02_vec_add/vec_add_cuda_test.cpp
         pmpp/utils/eigen_utils_test.cpp
-        pmpp/03_05_06_mat_mul/mat_mul_cuda_test.cpp
         pmpp/07_convolution/conv_1d_test.cpp
         pmpp/08_stencil/stencil_1d_test.cpp
         pmpp/08_stencil/stencil_2d_test.cpp
@@ -88,6 +109,8 @@ add_executable(pmpp_cuda_test main_test.cpp
         pmpp/10_reduction/sum_test.cpp
         pmpp/11_scan/cum_sum_host_test.cpp
         pmpp/11_scan/cum_sum_dev_test.cu
+        pmpp/03_05_06_mat_mul/mat_mul_test.cu
+        best_practices_nvidia/mat_transpose/tranpose_test.cu
 )
 set_target_properties(pmpp_cuda_test PROPERTIES CUDA_SEPARABLE_COMPILATION OFF)
 target_compile_options(pmpp_cuda_test PRIVATE $<$<COMPILE_LANGUAGE:CUDA>:

@@ -1,13 +1,13 @@
-#ifndef TIMER_CUH
-#define TIMER_CUH
+#ifndef DEV_TIMER_CUH
+#define DEV_TIMER_CUH
 
 //Timer for cuda events and kernels.
-class Timer
+class DevTimer
 {
 public:
     //TODO: Add stream and device info.
-    Timer();
-    ~Timer();
+    DevTimer();
+    ~DevTimer();
 
     //Start the clock.
     void tic();
@@ -20,4 +20,4 @@ private:
 };
 
 
-#endif //TIMER_CUH
+#endif //DEV_TIMER_CUH

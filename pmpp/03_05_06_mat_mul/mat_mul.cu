@@ -1,146 +1,44 @@
 #include "mat_mul.cuh"
 #include "../utils/dev_config.cuh"
+#include "../utils/dev_vector.cuh"
+#include <cublas_v2.h>
+#include "../utils/dev_timer.cuh"
+#include "mat_mul_naive.cuh"
+#include "mat_mul_cublas.cuh"
+#include "sq_mat_mul_tiled_static_sm.cuh"
+#include "sq_mat_mul_tiled_dynamic_sm.cuh"
+#include "../utils/dlib_utils.cuh"
+#include <dlib/matrix.h>
+#include <string>
 
 namespace PMPP::CUDA
 {
-__global__ void mat_mul(float const *a, float const *b, float *res,
-                        unsigned num_rows_a, unsigned num_cols_a,
-                        unsigned num_cols_b)
+void matMulPerfTest()
 {
-    auto const row = blockIdx.y * blockDim.y + threadIdx.y;
-    auto const col = blockIdx.x * blockDim.x + threadIdx.x;
+    std::cout << "Performance test for matrix multiplication: start" << std::endl;
+    auto const N = 32 * 300;
+    std::cout << "Matrix size: "<< N <<"x" << N << std::endl;
+    auto const first = DlibUtils::constMat(N, N, 1.0f);
+    auto const sec = first;
 
-    if (row < num_rows_a && col < num_cols_b) {
-        auto res_elem_val = 0.0f;
-        for (auto idx = 0u; idx < num_cols_a; idx++) {
-            res_elem_val += (a[row * num_cols_a + idx] * b[idx * num_cols_b + col]);
-        }
-        res[row * num_cols_b + col] = res_elem_val;
+    auto mat_mul_vec = std::vector<std::pair<MatMul<float>, std::string>>{};
+    mat_mul_vec.push_back(std::make_pair(MatMul<float>{std::make_unique<MatMulNaive<float>>()},
+                                         "Naive"));
+    mat_mul_vec.push_back(std::make_pair(MatMul<float>{std::make_unique<MatMulCuBlas<float>>()},
+                                         "CuBlas"));
+    mat_mul_vec.push_back(
+        std::make_pair(MatMul<float>{std::make_unique<SqMatMulTiledStaticSM<float>>()},
+                       "Static shared memory"));
+    mat_mul_vec.push_back(
+        std::make_pair(MatMul<float>{std::make_unique<SqMatMulTiledDynamicSM<float>>(32u)},
+                       "Dynamic shared memory"));
+
+    for (auto const &[mat_mul, desc]: mat_mul_vec) {
+        auto const res = mat_mul.run(first, sec);
+        std::cout << desc << ": " << std::get<1>(res).kernel_duration_ms << " milli seconds."
+                  << std::endl;
     }
+    std::cout << "Performance test for matrix multiplication: end" << std::endl;
 }
 
-__global__ void mat_mul_shared_mem(float const *a, float const *b, float *res,
-                                   unsigned num_rows_a, unsigned num_cols_a,
-                                   unsigned num_cols_b)
-{
-    // It is assumed that blockDim.x == blockDim.y.
-    auto const tile_width = blockDim.x;
-    auto const row = blockIdx.y * tile_width + threadIdx.y;
-    auto const col = blockIdx.x * tile_width + threadIdx.x;
-
-    extern __shared__ float shared_mem[];
-    auto a_tile = reinterpret_cast<float *>(shared_mem);
-    auto b_tile = reinterpret_cast<float *>(shared_mem + tile_width * tile_width);
-
-    auto const num_rows_b = num_cols_a;
-    auto const num_tiles = static_cast<unsigned>(
-        ceil(static_cast<float>(max(num_rows_a, num_cols_b)) /
-            static_cast<float>(tile_width)));
-    for (auto tile_idx = 0u; tile_idx < num_tiles; tile_idx++) {
-
-        // Load the tiles into shared memory.
-        auto const a_row = row;
-        auto const b_col = col;
-        auto const a_col = tile_idx * tile_width + threadIdx.x;
-        auto const b_row = tile_idx * tile_width + threadIdx.y;
-
-        if (a_row < num_rows_a && a_col < num_cols_a) {
-            a_tile[threadIdx.y * tile_width + threadIdx.x] = a[a_row * num_cols_a + a_col];
-        }
-        else {
-            a_tile[threadIdx.y * tile_width + threadIdx.x] = 0.0f;
-        }
-        if (b_row < num_rows_b && b_col < num_cols_b) {
-            b_tile[threadIdx.y * tile_width + threadIdx.x] = b[b_row * num_cols_b + b_col];
-        }
-        else {
-            b_tile[threadIdx.y * tile_width + threadIdx.x] = 0.0f;
-        }
-
-        __syncthreads();
-
-        // Compute the result for the tiles.
-        auto res_elem_val = 0.0f;
-        for (auto idx = 0u; idx < tile_width; idx++) {
-            res_elem_val += (a_tile[threadIdx.y * tile_width + idx]
-                * b_tile[idx * tile_width + threadIdx.x]);
-        }
-
-        // Store the result in the global memory.
-        if (row < num_rows_a && col < num_cols_b) {
-            res[row * num_cols_b + col] += res_elem_val;
-        }
-        __syncthreads();
-    }
-}
-
-Eigen::MatrixXf matMul(Eigen::MatrixXf const &a,
-                       Eigen::MatrixXf const &b,
-                       bool use_shared_mem)
-{
-    if (a.cols() != b.rows()) {
-        throw std::invalid_argument{"Invalid size for matrix multiplication."};
-    }
-
-    // Copy Eigen matrix objects to STL vector to copy to GPU.
-    auto const a_vec = EigenUtils::toVec(a);
-    auto const b_vec = EigenUtils::toVec(b);
-    auto res_vec = std::vector<float>(a.rows() * b.cols(), -1.0f);
-
-    // Check the device has enough global memory to store all vectors.
-    auto const &dev_config = DeviceConfigSingleton::getInstance();
-    if ((a_vec.size() + b_vec.size() + res_vec.size()) * sizeof(float) >
-        dev_config.getDevProps(0).global_mem_size) {
-        throw std::runtime_error{"Insufficient global memory on the device."};
-    }
-
-
-    // Allocate device GPU memory.
-    auto a_vec_dev = static_cast<float *>(nullptr);
-    auto b_vec_dev = static_cast<float *>(nullptr);
-    auto res_vec_dev = static_cast<float *>(nullptr);
-    cudaMalloc(reinterpret_cast<void **>(&a_vec_dev), a_vec.size() * sizeof(float));
-    cudaMalloc(reinterpret_cast<void **>(&b_vec_dev), b_vec.size() * sizeof(float));
-    cudaMalloc(reinterpret_cast<void **>(&res_vec_dev), res_vec.size() * sizeof(float));
-
-    // Transfer input matrix elements to GPU.
-    cudaMemcpy(a_vec_dev, a_vec.data(), a_vec.size() * sizeof(float), cudaMemcpyHostToDevice);
-    cudaMemcpy(b_vec_dev, b_vec.data(), b_vec.size() * sizeof(float), cudaMemcpyHostToDevice);
-
-    // Execute the kernel.
-    auto const shared_mem_per_blk = dev_config.getDevProps(0).max_shared_mem_per_block;
-
-    auto const block_size = dim3{16u, 16u};
-    auto const num_block_x = (static_cast<unsigned>(b.cols()) + block_size.x - 1u) / block_size.x;
-    auto const num_block_y = (static_cast<unsigned>(a.rows()) + block_size.y - 1u) / block_size.y;
-    auto const grid_size = dim3{num_block_x, num_block_y};
-
-    if (use_shared_mem) {
-        if(block_size.x != block_size.y) {
-            throw std::invalid_argument{"The number of threads per block in each dimension must be equal."};
-        }
-        auto const tile_width = block_size.x;
-        auto const shared_mem_size = 2 * tile_width * tile_width * sizeof(float);
-        if (shared_mem_size > shared_mem_per_blk) {
-            throw std::runtime_error{"Shared memory size exceeds the limit."};
-        }
-        mat_mul_shared_mem<<<grid_size, block_size, shared_mem_size>>>(
-            a_vec_dev, b_vec_dev, res_vec_dev,
-            static_cast<unsigned>(a.rows()),
-            static_cast<unsigned>(a.cols()),
-            static_cast<unsigned>(b.cols()));
-    }
-    else {
-        mat_mul<<<grid_size, block_size>>>(a_vec_dev,
-                                           b_vec_dev,
-                                           res_vec_dev,
-                                           static_cast<unsigned>(a.rows()),
-                                           static_cast<unsigned>(a.cols()),
-                                           static_cast<unsigned>(b.cols()));
-    }
-    cudaMemcpy(res_vec.data(), res_vec_dev, res_vec.size() * sizeof(float), cudaMemcpyDeviceToHost);
-
-    return EigenUtils::toMat<float>(res_vec, a.rows(), b.cols());
-}
-
-} //Numeric namespace.
+} //PMPP::CUDA namespace.

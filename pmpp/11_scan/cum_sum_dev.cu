@@ -1,5 +1,6 @@
 #include "cum_sum_dev.cuh"
 #include "../utils/dev_vector.cuh"
+#include "../utils/dev_vector_factory.cuh"
 #include <stdexcept>
 
 namespace PMPP
@@ -51,7 +52,7 @@ std::vector<float> cumSumDev(std::vector<float> const &vec,
     if (std::size(vec) % 32 != 0)
         throw std::invalid_argument{"Input size should be a multiple of 32."};
 
-    auto const vec_dev = DevVector{vec};
+    auto const vec_dev = DevVectorFactory::create(vec);
     auto const num_elems = static_cast<unsigned>(std::size(vec));
     auto res_dev = DevVector<float>{num_elems};
 
@@ -65,6 +66,6 @@ std::vector<float> cumSumDev(std::vector<float> const &vec,
             break;
     }
 
-    return res_dev.hostCopy();
+    return HostDevCopy::hostCopy(res_dev);
 }
 }// PMPP namespace.

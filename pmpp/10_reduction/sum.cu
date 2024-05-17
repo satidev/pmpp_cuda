@@ -5,6 +5,8 @@
 #include <iostream>
 #include "../utils/check_error.cuh"
 #include "../utils/dev_vector.cuh"
+#include "../utils/dev_vector_factory.cuh"
+#include "../utils/host_dev_copy.cuh"
 
 namespace PMPP::CUDA
 {
@@ -148,7 +150,7 @@ float sumParallel(std::vector<float> const &data_host,
 
         auto const num_elems = std::size(data_host);
 
-        auto const data_dev = DevVector{data_host};
+        auto const data_dev = DevVectorFactory::create(data_host);
         auto sum_dev = DevVector<float>{1u, 0u};
 
         switch (strategy) {
@@ -195,7 +197,7 @@ float sumParallel(std::vector<float> const &data_host,
         }
         checkError(cudaGetLastError(), "launch of sum kernel");
 
-        return sum_dev.hostCopy().front();
+        return HostDevCopy::hostCopy(sum_dev).front();
     }
 }
 
