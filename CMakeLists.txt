@@ -22,10 +22,6 @@ add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/external/dlib)
 
 enable_testing()
 add_library(pmpp_cuda_lib
-        pmpp/02_vec_add/vec_add.h
-        pmpp/02_vec_add/vec_add.cpp
-        pmpp/02_vec_add/vec_add.cu
-        pmpp/02_vec_add/vec_add.cuh
         pmpp/03_05_06_mat_mul/mat_mul.cuh
         pmpp/03_05_06_mat_mul/mat_mul.cu
         utils/dev_config.cuh
@@ -76,6 +72,9 @@ add_library(pmpp_cuda_lib
         best_practices_nvidia/mat_transpose/trans_impl_naive.cuh
         best_practices_nvidia/mat_transpose/trans_impl_sm.cuh
         best_practices_nvidia/mat_transpose/trans_impl_sm_no_bank_conflict.cuh
+        pmpp/02_vec_add/vec_add_cublas.cuh
+        pmpp/02_vec_add/vec_add.cuh
+        pmpp/02_vec_add/vec_add.cu
 )
 target_include_directories(pmpp_cuda_lib PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/external)
 target_link_libraries(pmpp_cuda_lib cublas)
@@ -92,8 +91,6 @@ target_compile_options(pmpp_cuda PRIVATE $<$<COMPILE_LANGUAGE:CUDA>:
 target_link_libraries(pmpp_cuda pmpp_cuda_lib)
 
 add_executable(pmpp_cuda_test main_test.cpp
-        pmpp/02_vec_add/vec_add_test.cpp
-        pmpp/02_vec_add/vec_add_cuda_test.cpp
         pmpp/07_convolution/conv_1d_test.cpp
         pmpp/08_stencil/stencil_1d_test.cpp
         pmpp/08_stencil/stencil_2d_test.cpp
@@ -104,6 +101,7 @@ add_executable(pmpp_cuda_test main_test.cpp
         pmpp/11_scan/cum_sum_dev_test.cu
         pmpp/03_05_06_mat_mul/mat_mul_test.cu
         best_practices_nvidia/mat_transpose/tranpose_test.cu
+        pmpp/02_vec_add/vec_add_test.cu
 )
 set_target_properties(pmpp_cuda_test PROPERTIES CUDA_SEPARABLE_COMPILATION OFF)
 target_compile_options(pmpp_cuda_test PRIVATE $<$<COMPILE_LANGUAGE:CUDA>:

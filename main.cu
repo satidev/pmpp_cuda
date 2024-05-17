@@ -9,6 +9,7 @@
 #include "best_practices_nvidia/mem_optim/mem_bandwidth.cuh"
 #include "best_practices_nvidia/mem_optim/copy_execute_latency.cuh"
 #include "best_practices_nvidia/mat_transpose/transpose.cuh"
+#include "pmpp/02_vec_add/vec_add.cuh"
 
 int main()
 {
@@ -16,8 +17,8 @@ int main()
         auto const color_file = std::string{"/home/shiras/Downloads/passphoto.jpg"};
         auto const gray_file = std::string{"/home/shiras/Downloads/passphoto_grayx4000x6000.bin"};
         //PMPP::color2Gray(color_file, gray_file);
-        //PMPP::CUDA::vecAddExample();
-        PMPP::matMulPerfTest();
+        PMPP::vecAddPerfTest();
+        //PMPP::matMulPerfTest();
         //Bandwidth::bandwidthTest();
         //CopyExecuteLatency::runPerfTest();
         //BPNV::transposePerfTest();
