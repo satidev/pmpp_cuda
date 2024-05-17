@@ -4,7 +4,7 @@
 #include "mat_mul_impl.cuh"
 #include "../../utils/check_error.cuh"
 
-namespace PMPP::CUDA
+namespace PMPP
 {
 template<typename T>
 class MatMulNaive: public MatMulImpl<T>
@@ -52,7 +52,7 @@ void MatMulNaive<T>::launchKernel(T const *first, T const *sec, T *res,
     checkErrorKernel("matMulKernel", true);
 }
 
-}// PMPP::CUDA namespace.
+}// PMPP namespace.
 
 #endif //MAT_MUL_NAIVE_CUH
 

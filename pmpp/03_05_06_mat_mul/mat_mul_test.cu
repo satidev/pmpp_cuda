@@ -9,7 +9,7 @@
 #include "sq_mat_mul_tiled_dynamic_sm.cuh"
 #include "../../utils/dlib_utils.cuh"
 
-using namespace PMPP::CUDA;
+using namespace PMPP;
 
 TEST(cudaMatMulTest, noThrowDueToValidSize)
 {

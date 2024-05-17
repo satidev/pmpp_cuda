@@ -5,7 +5,7 @@
 #include "../../utils/dev_config.cuh"
 #include <stdexcept>
 
-namespace PMPP::CUDA
+namespace PMPP
 {
 // Static shared memory version of the tiled matrix multiplication
 // for square matrices.
@@ -90,7 +90,7 @@ void SqMatMulTiledStaticSM<T>::launchKernel(T const *first,
     checkErrorKernel("SqMatMulTiledStaticSMKernel", true);
 }
 
-}// PMPP::CUDA namespace.
+}// PMPP namespace.
 
 #endif //SQ_MAT_MUL_TILED_STATIC_SM_CUH
 

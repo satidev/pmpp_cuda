@@ -3,7 +3,7 @@
 
 #include "../../utils/dev_timer.cuh"
 
-namespace PMPP::CUDA
+namespace PMPP
 {
 template<typename T>
 class MatMulImpl
@@ -17,7 +17,7 @@ public:
                               unsigned num_cols_sec) = 0;
 };
 
-}// PMPP::CUDA namespace.
+}// PMPP namespace.
 
 #endif //MAT_MUL_IMPL_CUH
 

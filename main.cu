@@ -17,7 +17,7 @@ int main()
         auto const gray_file = std::string{"/home/shiras/Downloads/passphoto_grayx4000x6000.bin"};
         //PMPP::color2Gray(color_file, gray_file);
         //PMPP::CUDA::vecAddExample();
-        PMPP::CUDA::matMulPerfTest();
+        PMPP::matMulPerfTest();
         //Bandwidth::bandwidthTest();
         //CopyExecuteLatency::runPerfTest();
         //BPNV::transposePerfTest();

@@ -6,7 +6,7 @@
 #include "../../utils/dev_config.cuh"
 #include <stdexcept>
 
-namespace PMPP::CUDA
+namespace PMPP
 {
 template<typename T>
 class MatMulTiled: public MatMulImpl<T>
@@ -103,7 +103,7 @@ void MatMulTiled<T>::launchKernel(T const *first,
                                                  num_cols_sec);
 }
 
-}// PMPP::CUDA namespace.
+}// PMPP namespace.
 #endif //MAT_MUL_TILED_CUH
 
 

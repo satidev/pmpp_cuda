@@ -4,7 +4,7 @@
 #include "mat_mul_impl.cuh"
 #include <cublas_v2.h>
 
-namespace PMPP::CUDA
+namespace PMPP
 {
 template<typename T>
 class MatMulCuBlas: public MatMulImpl<T>
@@ -35,7 +35,7 @@ void MatMulCuBlas<T>::launchKernel(T const *first,
     cublasDestroy_v2(handle);
 }
 
-}// PMPP::CUDA
+}// PMPP namespace.
 
 #endif //MAT_MUL_CUBLAS_CUH
 

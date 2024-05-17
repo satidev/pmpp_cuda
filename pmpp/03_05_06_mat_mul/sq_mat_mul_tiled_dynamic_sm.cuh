@@ -7,7 +7,7 @@
 #include "../../utils/check_error.cuh"
 
 
-namespace PMPP::CUDA
+namespace PMPP
 {
 // Static shared memory version of the tiled matrix multiplication
 // for square matrices.
@@ -101,7 +101,7 @@ void SqMatMulTiledDynamicSM<T>::launchKernel(T const *first,
     checkErrorKernel("SqMatMulTiledStaticSMKernel", true);
 }
 
-} // PMPP::CUDA namespace.
+} // PMPP namespace.
 
 #endif //SQ_MAT_MUL_TILED_DYNAMIC_SM_CUH
 

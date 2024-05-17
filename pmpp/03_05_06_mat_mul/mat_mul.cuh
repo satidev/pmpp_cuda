@@ -12,7 +12,7 @@
 #include "../../utils/dev_vector_factory.cuh"
 #include <dlib/matrix.h>
 
-namespace PMPP::CUDA
+namespace PMPP
 {
 template<typename T>
 class MatMul
@@ -73,6 +73,6 @@ std::tuple<dlib::matrix<T>, PerfInfo> MatMul<T>::run(dlib::matrix<T> const &firs
 }
 
 void matMulPerfTest();
-}// Numeric namespace.
+}// PMPP namespace.
 
 #endif //MAT_MUL_CUH

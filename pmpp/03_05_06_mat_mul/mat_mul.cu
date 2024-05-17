@@ -11,7 +11,7 @@
 #include <dlib/matrix.h>
 #include <string>
 
-namespace PMPP::CUDA
+namespace PMPP
 {
 void matMulPerfTest()
 {
@@ -41,4 +41,4 @@ void matMulPerfTest()
     std::cout << "Performance test for matrix multiplication: end" << std::endl;
 }
 
-} //PMPP::CUDA namespace.
+} //PMPP namespace.
