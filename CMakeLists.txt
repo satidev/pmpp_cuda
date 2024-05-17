@@ -57,7 +57,7 @@ add_library(pmpp_cuda_lib
         pmpp/03_color_gray_scale/color_gray_scale.cuh
         pmpp/03_color_gray_scale/color_gray_scale.cu
         pmpp/03_05_06_mat_mul/mat_mul_naive.cuh
-        pmpp/03_05_06_mat_mul/mat_mul_impl.cuh
+        pmpp/03_05_06_mat_mul/mat_mul_impl_strategy.cuh
         pmpp/03_05_06_mat_mul/mat_mul_cublas.cuh
         pmpp/03_05_06_mat_mul/mat_mul_tiled.cuh
         pmpp/03_05_06_mat_mul/sq_mat_mul_tiled_static_sm.cuh

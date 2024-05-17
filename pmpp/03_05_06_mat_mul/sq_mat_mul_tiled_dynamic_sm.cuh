@@ -1,7 +1,7 @@
 #ifndef SQ_MAT_MUL_TILED_DYNAMIC_SM_CUH
 #define SQ_MAT_MUL_TILED_DYNAMIC_SM_CUH
 
-#include "mat_mul_impl.cuh"
+#include "mat_mul_impl_strategy.cuh"
 #include "../../utils/dev_config.cuh"
 #include <stdexcept>
 #include "../../utils/check_error.cuh"
@@ -12,7 +12,7 @@ namespace PMPP
 // Static shared memory version of the tiled matrix multiplication
 // for square matrices.
 template<typename T>
-class SqMatMulTiledDynamicSM: public MatMulImpl<T>
+class SqMatMulTiledDynamicSM: public MatMulImplStrategy<T>
 {
 private:
     unsigned tile_size_;

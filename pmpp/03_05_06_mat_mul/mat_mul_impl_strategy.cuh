@@ -1,15 +1,15 @@
-#ifndef MAT_MUL_IMPL_CUH
-#define MAT_MUL_IMPL_CUH
+#ifndef MAT_MUL_IMPL_STRATEGY_CUH
+#define MAT_MUL_IMPL_STRATEGY_CUH
 
 #include "../../utils/dev_timer.cuh"
 
 namespace PMPP
 {
 template<typename T>
-class MatMulImpl
+class MatMulImplStrategy
 {
 public:
-    virtual ~MatMulImpl() = default;
+    virtual ~MatMulImplStrategy() = default;
 
     virtual void launchKernel(T const *first, T const *sec, T *res,
                               unsigned num_rows_first,
@@ -19,5 +19,5 @@ public:
 
 }// PMPP namespace.
 
-#endif //MAT_MUL_IMPL_CUH
+#endif //MAT_MUL_IMPL_STRATEGY_CUH
 

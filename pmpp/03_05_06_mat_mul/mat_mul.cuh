@@ -2,7 +2,7 @@
 #define MAT_MUL_CUH
 
 #include <memory>
-#include "mat_mul_impl.cuh"
+#include "mat_mul_impl_strategy.cuh"
 #include "../../utils/dev_config.cuh"
 #include "../../utils/dev_vector.cuh"
 #include <stdexcept>
@@ -18,10 +18,10 @@ template<typename T>
 class MatMul
 {
 private:
-    std::unique_ptr<MatMulImpl<T>> impl_;
+    std::unique_ptr<MatMulImplStrategy<T>> impl_;
 
 public:
-    explicit MatMul(std::unique_ptr<MatMulImpl<T>> impl)
+    explicit MatMul(std::unique_ptr<MatMulImplStrategy<T>> impl)
         :
         impl_{std::move(impl)}
     {}

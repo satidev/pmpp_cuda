@@ -1,13 +1,13 @@
 #ifndef MAT_MUL_NAIVE_CUH
 #define MAT_MUL_NAIVE_CUH
 
-#include "mat_mul_impl.cuh"
+#include "mat_mul_impl_strategy.cuh"
 #include "../../utils/check_error.cuh"
 
 namespace PMPP
 {
 template<typename T>
-class MatMulNaive: public MatMulImpl<T>
+class MatMulNaive: public MatMulImplStrategy<T>
 {
 public:
     void launchKernel(T const *first, T const *sec, T *res,

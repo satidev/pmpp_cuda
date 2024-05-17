@@ -1,13 +1,13 @@
 #ifndef MAT_MUL_CUBLAS_CUH
 #define MAT_MUL_CUBLAS_CUH
 
-#include "mat_mul_impl.cuh"
+#include "mat_mul_impl_strategy.cuh"
 #include <cublas_v2.h>
 
 namespace PMPP
 {
 template<typename T>
-class MatMulCuBlas: public MatMulImpl<T>
+class MatMulCuBlas: public MatMulImplStrategy<T>
 {
 public:
     void launchKernel(T const *first, T const *sec, T *res,

@@ -1,7 +1,7 @@
 #ifndef SQ_MAT_MUL_TILED_STATIC_SM_CUH
 #define SQ_MAT_MUL_TILED_STATIC_SM_CUH
 
-#include "mat_mul_impl.cuh"
+#include "mat_mul_impl_strategy.cuh"
 #include "../../utils/dev_config.cuh"
 #include <stdexcept>
 
@@ -10,7 +10,7 @@ namespace PMPP
 // Static shared memory version of the tiled matrix multiplication
 // for square matrices.
 template<typename T>
-class SqMatMulTiledStaticSM: public MatMulImpl<T>
+class SqMatMulTiledStaticSM: public MatMulImplStrategy<T>
 {
 public:
     void launchKernel(T const *first, T const *sec, T *res,

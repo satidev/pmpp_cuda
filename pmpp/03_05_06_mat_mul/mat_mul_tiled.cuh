@@ -1,7 +1,7 @@
 #ifndef MAT_MUL_TILED_CUH
 #define MAT_MUL_TILED_CUH
 
-#include "mat_mul_impl.cuh"
+#include "mat_mul_impl_strategy.cuh"
 #include "../../utils/check_error.cuh"
 #include "../../utils/dev_config.cuh"
 #include <stdexcept>
@@ -9,7 +9,7 @@
 namespace PMPP
 {
 template<typename T>
-class MatMulTiled: public MatMulImpl<T>
+class MatMulTiled: public MatMulImplStrategy<T>
 {
 public:
     void launchKernel(T const *first, T const *sec, T *res,

@@ -17,7 +17,7 @@ namespace PMPP
 
     void color2Gray(std::string const &color_file,
                     std::string const &gray_file);
-}
+}// PMPP namespace.
 
 #endif //COLOR_GRAY_SCALE_CUH
 
