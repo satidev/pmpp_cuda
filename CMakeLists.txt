@@ -71,10 +71,11 @@ add_library(pmpp_cuda_lib
         best_practices_nvidia/mat_transpose/trans_impl_strategy.cuh
         best_practices_nvidia/mat_transpose/trans_impl_naive.cuh
         best_practices_nvidia/mat_transpose/trans_impl_sm.cuh
-        best_practices_nvidia/mat_transpose/trans_impl_sm_no_bank_conflict.cuh
+        best_practices_nvidia/mat_transpose/trans_impl_sm_padding.cuh
         pmpp/02_vec_add/vec_add_cublas.cuh
         pmpp/02_vec_add/vec_add.cuh
         pmpp/02_vec_add/vec_add.cu
+        best_practices_nvidia/mat_transpose/trans_impl_sm_swizzling.cuh
 )
 target_include_directories(pmpp_cuda_lib PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/external)
 target_link_libraries(pmpp_cuda_lib cublas)

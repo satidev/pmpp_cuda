@@ -17,11 +17,11 @@ int main()
         auto const color_file = std::string{"/home/shiras/Downloads/passphoto.jpg"};
         auto const gray_file = std::string{"/home/shiras/Downloads/passphoto_grayx4000x6000.bin"};
         //PMPP::color2Gray(color_file, gray_file);
-        PMPP::vecAddPerfTest();
+        //PMPP::vecAddPerfTest();
         //PMPP::matMulPerfTest();
         //Bandwidth::bandwidthTest();
         //CopyExecuteLatency::runPerfTest();
-        //BPNV::transposePerfTest();
+        BPNV::transposePerfTest();
     }
     catch (std::exception const &e) {
         std::cout << "Exception is thrown." << std::endl;

@@ -1,14 +1,15 @@
-#ifndef TRANS_IMPL_SM_NO_BANK_CONFLICT_CUH
-#define TRANS_IMPL_SM_NO_BANK_CONFLICT_CUH
+#ifndef TRANS_IMPL_SM_PADDING_CUH
+#define TRANS_IMPL_SM_PADDING_CUH
 
 #include "trans_impl_strategy.cuh"
 #include "../../utils/check_error.cuh"
 
 namespace BPNV
 {
-// Transpose matrix using shared memory.
+// Transpose matrix using shared memory with extra padded column
+// to avoid bank conflicts.
 template<typename T>
-class TransImplSMNoBankConflict: public TransImplStrategy<T>
+class TransImplSMPadding: public TransImplStrategy<T>
 {
 public:
     virtual void launchKernel(T const *input, T *output,
@@ -17,16 +18,17 @@ public:
 };
 #define TILE_SIZE 16u
 template<typename T>
-__global__ void transSMNoBCKernel(T const *input, T *output,
-                                  unsigned num_rows_input, unsigned num_cols_input)
+__global__ void transSMPaddedKernel(T const *input, T *output,
+                                    unsigned num_rows_input, unsigned num_cols_input)
 {
     // Bank conflict is arisen because the number of threads in a warp is 32
     // and the shared memory is divided into 32 banks.
     // During the reading of each column in shared memory,
-    // the threads in warp access the same bank.
-    // This leads to bank conflict.
-    // To avoid bank conflict, we increase the number of columns in shared memory by 1.
-    // By following the modulo operation, the threads in warp access different banks
+    // the threads in warp access the same bank serializing the memory requests.
+    // To avoid bank conflict and facilitate concurrent memory access,
+    // we increase the number of columns in shared memory by 1.
+    // By following the modulo operation, while accessing the element of each column
+    // the threads of a warp access different banks
     // avoiding bank conflicts.
     __shared__ T tile[TILE_SIZE][TILE_SIZE + 1];
 
@@ -53,22 +55,22 @@ __global__ void transSMNoBCKernel(T const *input, T *output,
 }
 
 template<typename T>
-void TransImplSMNoBankConflict<T>::launchKernel(const T *input,
-                                                T *output,
-                                                unsigned int num_rows_input,
-                                                unsigned int num_cols_input) const
+void TransImplSMPadding<T>::launchKernel(const T *input,
+                                         T *output,
+                                         unsigned int num_rows_input,
+                                         unsigned int num_cols_input) const
 {
     auto const block_size = dim3{TILE_SIZE, TILE_SIZE};
     auto const num_block_x = (num_cols_input + block_size.x - 1u) / block_size.x;
     auto const num_block_y = (num_rows_input + block_size.y - 1u) / block_size.y;
     auto const grid_size = dim3{num_block_x, num_block_y};
 
-    transSMNoBCKernel<<<grid_size, block_size>>>(input, output, num_rows_input, num_cols_input);
-    checkErrorKernel("transSMNoBCKernel", true);
+    transSMPaddedKernel<<<grid_size, block_size>>>(input, output, num_rows_input, num_cols_input);
+    checkErrorKernel("transSMPaddedKernel", true);
 }
 
 }// BPNV namespace.
 
-#endif //TRANS_IMPL_SM_NO_BANK_CONFLICT_CUH
+#endif //TRANS_IMPL_SM_PADDING_CUH
 
 
