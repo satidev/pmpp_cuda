@@ -1,0 +1,15 @@
+#ifndef PLOT_H
+#define PLOT_H
+
+#include <iostream>
+#include <vector>
+#include <tuple>
+#include <string>
+#include "utils/perf.cuh"
+
+void plotTime(std::vector<std::tuple<std::string, std::vector<PerfInfo>>> const &info,
+              std::string const &output_dir_name);
+void plotPerfBoost(std::vector<std::tuple<std::string, std::vector<PerfInfo>>> const &info,
+                   std::string const &output_dir_name);
+#endif //PLOT_H
+

@@ -10,6 +10,7 @@ endif ()
 
 project(pmpp_cuda CXX CUDA)
 set(CMAKE_CXX_STANDARD 20)
+find_package(PythonLibs 3 REQUIRED)
 include(FetchContent)
 FetchContent_Declare(
         googletest
@@ -19,9 +20,8 @@ FetchContent_Declare(
 set(gtest_force_shared_crt ON CACHE BOOL "" FORCE)
 FetchContent_MakeAvailable(googletest)
 add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/external/dlib)
-
 enable_testing()
-add_library(pmpp_cuda_lib
+add_library(cuda_lib
         pmpp/03_05_06_mat_mul/mat_mul.cuh
         pmpp/03_05_06_mat_mul/mat_mul.cu
         utils/dev_config.cuh
@@ -76,22 +76,27 @@ add_library(pmpp_cuda_lib
         pmpp/02_vec_add/vec_add.cuh
         pmpp/02_vec_add/vec_add.cu
         best_practices_nvidia/mat_transpose/trans_impl_sm_swizzling.cuh
+        best_practices_nvidia/mat_transpose/perf_test.cuh
+        best_practices_nvidia/mat_transpose/perf_test.cu
 )
-target_include_directories(pmpp_cuda_lib PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/external)
-target_link_libraries(pmpp_cuda_lib cublas)
-target_link_libraries(pmpp_cuda_lib dlib)
-add_executable(pmpp_cuda main.cu
+target_include_directories(cuda_lib PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/external)
+target_link_libraries(cuda_lib cublas)
+target_link_libraries(cuda_lib dlib)
 
-)
-set_target_properties(pmpp_cuda PROPERTIES CUDA_SEPARABLE_COMPILATION OFF)
-target_compile_options(pmpp_cuda PRIVATE $<$<COMPILE_LANGUAGE:CUDA>:
+add_executable(run_perf_tests main.cu
+        plot.h
+        plot.cpp)
+set_target_properties(run_perf_tests PROPERTIES CUDA_SEPARABLE_COMPILATION OFF)
+target_compile_options(run_perf_tests PRIVATE $<$<COMPILE_LANGUAGE:CUDA>:
         --generate-line-info
         --expt-extended-lambda
         --expt-relaxed-constexpr
         -ftemplate-backtrace-limit=0 >)
-target_link_libraries(pmpp_cuda pmpp_cuda_lib)
-
-add_executable(pmpp_cuda_test main_test.cpp
+target_link_libraries(run_perf_tests cuda_lib)
+target_include_directories(run_perf_tests PRIVATE ${PYTHON_INCLUDE_DIRS})
+target_link_libraries(run_perf_tests ${PYTHON_LIBRARIES})
+target_include_directories(run_perf_tests PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/external/matplotlib-cpp)
+add_executable(run_unit_tests main_test.cpp
         pmpp/07_convolution/conv_1d_test.cpp
         pmpp/08_stencil/stencil_1d_test.cpp
         pmpp/08_stencil/stencil_2d_test.cpp
@@ -101,14 +106,14 @@ add_executable(pmpp_cuda_test main_test.cpp
         pmpp/11_scan/cum_sum_host_test.cpp
         pmpp/11_scan/cum_sum_dev_test.cu
         pmpp/03_05_06_mat_mul/mat_mul_test.cu
-        best_practices_nvidia/mat_transpose/tranpose_test.cu
+        best_practices_nvidia/mat_transpose/unit_test.cu
         pmpp/02_vec_add/vec_add_test.cu
 )
-set_target_properties(pmpp_cuda_test PROPERTIES CUDA_SEPARABLE_COMPILATION OFF)
-target_compile_options(pmpp_cuda_test PRIVATE $<$<COMPILE_LANGUAGE:CUDA>:
+set_target_properties(run_unit_tests PROPERTIES CUDA_SEPARABLE_COMPILATION OFF)
+target_compile_options(run_unit_tests PRIVATE $<$<COMPILE_LANGUAGE:CUDA>:
         --expt-extended-lambda --expt-relaxed-constexpr -ftemplate-backtrace-limit=0 >
 )
-target_link_libraries(pmpp_cuda_test pmpp_cuda_lib)
-target_link_libraries(pmpp_cuda_test GTest::gtest_main GTest::gmock_main)
+target_link_libraries(run_unit_tests cuda_lib)
+target_link_libraries(run_unit_tests GTest::gtest_main GTest::gmock_main)
 include(GoogleTest)
-gtest_discover_tests(pmpp_cuda_test)
+gtest_discover_tests(run_unit_tests)

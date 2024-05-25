@@ -1,27 +1,49 @@
 #include <iostream>
-#include "pmpp/07_convolution/conv_1d.cuh"
-#include "utils/dev_config.cuh"
-#include "utils/exec_config.cuh"
-#include "utils/host_timer.h"
-#include "pmpp/08_stencil/stencil_1d.cuh"
-#include "pmpp/03_color_gray_scale/color_gray_scale.cuh"
-#include "pmpp/03_05_06_mat_mul/mat_mul.cuh"
-#include "best_practices_nvidia/mem_optim/mem_bandwidth.cuh"
-#include "best_practices_nvidia/mem_optim/copy_execute_latency.cuh"
-#include "best_practices_nvidia/mat_transpose/transpose.cuh"
-#include "pmpp/02_vec_add/vec_add.cuh"
+#include "best_practices_nvidia/mat_transpose/perf_test.cuh"
+#include <dlib/cmd_line_parser.h>
+#include "plot.h"
 
-int main()
+int main(int argc, char** argv)
 {
     try {
-        auto const color_file = std::string{"/home/shiras/Downloads/passphoto.jpg"};
-        auto const gray_file = std::string{"/home/shiras/Downloads/passphoto_grayx4000x6000.bin"};
-        //PMPP::color2Gray(color_file, gray_file);
-        //PMPP::vecAddPerfTest();
-        //PMPP::matMulPerfTest();
-        //Bandwidth::bandwidthTest();
-        //CopyExecuteLatency::runPerfTest();
-        BPNV::transposePerfTest();
+        if(argc < 2) {
+            std::cerr << "Usage: ./run_perf_tests -f <operation_name> -n <num_iterations> -o <output_dir>" << std::endl;
+            return 1;
+        }
+
+        auto parser = dlib::command_line_parser{};
+        parser.add_option("h", "Display this message.");
+        parser.add_option("a", "Action/operation whose performance needs to analyzed.", 1);
+        parser.add_option("n", "Number of iterations.", 1);
+        parser.add_option("o", "Output directory name to save plots.", 1);
+        parser.parse(argc, argv);
+
+        if (parser.option("h")) {
+            std::cout << "Usage: ./run_perf_tests -f <operation_name> -n <num_iterations> -o <output_dir>" << std::endl;
+            return 0;
+        }
+
+        auto const action = parser.option("a").argument();
+
+        auto num_iterations = 10u;
+        if (parser.option("n")) {
+            num_iterations = std::stoi(parser.option("n").argument());
+        }
+
+        auto output_dir = std::string{};
+        if (parser.option("o")) {
+            output_dir = parser.option("o").argument();
+        }
+
+        if (action == "mat-transpose") {
+            auto const perf_info = BPNV::transposePerfTest(num_iterations);
+            plotTime(perf_info, output_dir);
+            plotPerfBoost(perf_info, output_dir);
+        }
+        else {
+            std::cerr << "Invalid action operation." << std::endl;
+            std::cerr << "Usage: ./run_perf_tests -f <operation_name> -n <num_iterations> -o <output_dir>" << std::endl;
+        }
     }
     catch (std::exception const &e) {
         std::cout << "Exception is thrown." << std::endl;

@@ -59,7 +59,7 @@ std::tuple<dlib::matrix<T>, PerfInfo> Transpose<T>::run(dlib::matrix<T> const &m
                                      num_rows_input),
                            PerfInfo{time_taken_sec});
 }
-void transposePerfTest();
+
 }// BPNV namespace.
 
 #endif //TRANSPOSE_CUH
