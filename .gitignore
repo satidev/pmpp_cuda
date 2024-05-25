@@ -42,5 +42,7 @@ cmake-build-release-coverage
 cmake-build-debug-coverage
 thirdparty
 build
+external
 external/dlib
+external/matplotlib-cpp
 

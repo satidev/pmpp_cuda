@@ -1,3 +1,6 @@
 [submodule "external/dlib"]
 	path = external/dlib
 	url = https://github.com/davisking/dlib.git
+[submodule "external/matplotlib-cpp"]
+	path = external/matplotlib-cpp
+	url = https://github.com/lava/matplotlib-cpp.git
