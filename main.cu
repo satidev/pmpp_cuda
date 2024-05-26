@@ -14,7 +14,7 @@ int main(int argc, char** argv)
         auto parser = dlib::command_line_parser{};
         parser.add_option("h", "Display this message.");
         parser.add_option("a", "Action/operation whose performance needs to analyzed.", 1);
-        parser.add_option("n", "Number of iterations.", 1);
+        parser.add_option("n", "Number of repetitions.", 1);
         parser.add_option("o", "Output directory name to save plots.", 1);
         parser.parse(argc, argv);
 
@@ -25,9 +25,9 @@ int main(int argc, char** argv)
 
         auto const action = parser.option("a").argument();
 
-        auto num_iterations = 10u;
+        auto num_repetitions = 10u;
         if (parser.option("n")) {
-            num_iterations = std::stoi(parser.option("n").argument());
+            num_repetitions = std::stoi(parser.option("n").argument());
         }
 
         auto output_dir = std::string{};
@@ -36,7 +36,7 @@ int main(int argc, char** argv)
         }
 
         if (action == "mat-transpose") {
-            auto const perf_info = BPNV::transposePerfTest(num_iterations);
+            auto const perf_info = BPNV::transposePerfTest(num_repetitions);
             plotTime(perf_info, output_dir);
             plotPerfBoost(perf_info, output_dir);
         }

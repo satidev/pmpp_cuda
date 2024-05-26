@@ -3,20 +3,20 @@
 #include "matplotlibcpp.h"
 #include <filesystem>
 
-void plotTime(std::vector<std::tuple<std::string, std::vector<PerfInfo>>> const &info,
+void plotTime(std::vector<PerfTestResult> const &info,
               std::string const &output_dir_name)
 {
+    auto const num_experiments = std::size(info);
     auto data = std::vector<std::vector<float>>{};
+    data.reserve(num_experiments);
     auto labels = std::vector<std::string>{};
-    for (auto const &[name, perf_vec]: info) {
-        auto perf_data = std::vector<float>{};
-        for (auto const &perf: perf_vec) {
-            perf_data.push_back(perf.kernel_duration_ms);
-        }
-        data.push_back(perf_data);
-        labels.push_back(name);
+    labels.reserve(num_experiments);
 
+    for (auto [label, perf_vec]: info) {
+        labels.emplace_back(std::move(label));
+        data.emplace_back(std::move(perf_vec));
     }
+
     auto keywords = std::map<std::string, std::string>{};
     keywords["font.size"] = "24";
     keywords["boxplot.boxprops.linewidth"] = "3";
@@ -34,35 +34,38 @@ void plotTime(std::vector<std::tuple<std::string, std::vector<PerfInfo>>> const 
     if (!std::filesystem::exists(output_dir_name)) {
         matplotlibcpp::show();
     }
-    else{
+    else {
         auto const output_file = std::filesystem::path{output_dir_name} / "time.png";
         std::cout << "Saving plot to " << output_file << std::endl;
         matplotlibcpp::save(output_file.string());
     }
 }
 
-void plotPerfBoost(std::vector<std::tuple<std::string, std::vector<PerfInfo>>> const &info,
+void plotPerfBoost(std::vector<PerfTestResult> const &info,
                    std::string const &output_dir_name)
 {
-    auto const ref_time = std::get<1>(info.front());
+    auto const ref_metric = info.front().metric_vals;
     auto const num_experiments = std::size(info);
-    auto data = std::vector<std::vector<float>>{};
+    auto perf_boost_info = std::vector<PerfTestResult>{};
+    perf_boost_info.reserve(num_experiments - 1);
 
-    for (auto exp_idx = 1u; exp_idx < num_experiments; ++exp_idx) {
-        auto const &[name, perf_vec] = info[exp_idx];
-        auto boost_vec = std::vector<float>{};
-        std::transform(std::begin(perf_vec), std::end(perf_vec), std::begin(ref_time),
-                       std::back_inserter(boost_vec),
-                       [](auto const &perf, auto const &ref_perf)
-                       {
-                           return (ref_perf.kernel_duration_ms - perf.kernel_duration_ms) * 100.0f /
-                               ref_perf.kernel_duration_ms;
-                       }
-        );
-        data.push_back(boost_vec);
-    }
+    std::transform(std::begin(info) + 1u, std::end(info), std::back_inserter(perf_boost_info),
+                   [&ref_metric](auto const &perf_test)
+                   {
+                       auto const &[label, perf_vec] = perf_test;
+                       auto boost_vec = std::vector<float>{};
+                       std::transform(std::begin(perf_vec), std::end(perf_vec), std::begin(ref_metric),
+                                      std::back_inserter(boost_vec),
+                                      [](auto const &perf, auto const &ref_perf)
+                                      {
+                                          return (ref_perf - perf) * 100.0f / ref_perf;
+                                      }
+                       );
+                       return PerfTestResult{label, std::move(boost_vec)};
+                   }
+    );
 
-    auto run_idx = std::vector<float>(std::size(ref_time));
+    auto run_idx = std::vector<float>(std::size(ref_metric));
     std::iota(std::begin(run_idx), std::end(run_idx), 0.0f);
 
 
@@ -75,8 +78,8 @@ void plotPerfBoost(std::vector<std::tuple<std::string, std::vector<PerfInfo>>> c
     matplotlibcpp::title("Performance boost after optimization (%)");
     matplotlibcpp::xlabel("Run");
 
-    for(auto data_idx = 0u; data_idx < std::size(data); ++data_idx) {
-        matplotlibcpp::named_plot(std::get<0>(info[data_idx + 1]), run_idx, data[data_idx]);
+    for (auto const &[label, perf_boost]: perf_boost_info) {
+        matplotlibcpp::named_plot(label, run_idx, perf_boost);
     }
     matplotlibcpp::legend();
 
@@ -84,7 +87,7 @@ void plotPerfBoost(std::vector<std::tuple<std::string, std::vector<PerfInfo>>> c
     if (!std::filesystem::exists(output_dir_name)) {
         matplotlibcpp::show();
     }
-    else{
+    else {
         auto const output_file = std::filesystem::path{output_dir_name} / "boost.png";
         std::cout << "Saving plot to " << output_file << std::endl;
         matplotlibcpp::save(output_file.string());
