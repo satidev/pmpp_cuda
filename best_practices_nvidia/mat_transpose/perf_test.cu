@@ -8,7 +8,7 @@
 
 namespace BPNV
 {
-std::vector<PerfTestResult> transposePerfTest(unsigned num_rep)
+PerfTestResult transposePerfTest(unsigned num_rep)
 {
     std::cout << "Performance test for matrix transpose: start" << std::endl;
 
@@ -29,20 +29,19 @@ std::vector<PerfTestResult> transposePerfTest(unsigned num_rep)
         Transpose<float>{std::make_unique<TransImplSMSwizzling<float>>()},
         "sm-swizzling"));
 
-    auto perf_info_vec = std::vector<PerfTestResult>{};
+    auto perf_res = PerfTestResult{};
     for (auto const &[trans, desc]: trans_vec) {
 
         auto perf_vec = std::vector<float>{};
         for (auto run_idx = 0u; run_idx < num_rep; ++run_idx) {
             auto const res = trans.run(input);
-            perf_vec.emplace_back(std::get<1>(res).kernel_duration_ms);
+            perf_vec.emplace_back(std::get<1>(res).duration_ms);
         }
-        perf_info_vec.emplace_back(PerfTestResult{desc, std::move(perf_vec)});
-
+        perf_res[desc] = perf_vec;
     }
     std::cout << "Performance test for matrix transpose: end" << std::endl;
 
-    return perf_info_vec;
+    return perf_res;
 }
 }// BPNV namespace.
 

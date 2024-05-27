@@ -24,11 +24,11 @@ public:
         impl_{std::move(impl)}
     {}
 
-    std::tuple<dlib::matrix<T>, PerfInfo> run(dlib::matrix<T> const &mat) const;
+    std::tuple<dlib::matrix<T>, kernelPerfInfo> run(dlib::matrix<T> const &mat) const;
 };
 
 template<typename T>
-std::tuple<dlib::matrix<T>, PerfInfo> Transpose<T>::run(dlib::matrix<T> const &mat) const
+std::tuple<dlib::matrix<T>, kernelPerfInfo> Transpose<T>::run(dlib::matrix<T> const &mat) const
 {
     // Check the device has enough global memory to store all vectors.
     auto const &dev_config = DeviceConfigSingleton::getInstance();
@@ -57,7 +57,7 @@ std::tuple<dlib::matrix<T>, PerfInfo> Transpose<T>::run(dlib::matrix<T> const &m
     return std::make_tuple(dlib::mat(HostDevCopy::hostCopy(res_dev).data(),
                                      num_cols_input,
                                      num_rows_input),
-                           PerfInfo{time_taken_sec});
+                           kernelPerfInfo{time_taken_sec});
 }
 
 }// BPNV namespace.

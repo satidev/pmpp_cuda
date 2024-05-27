@@ -20,7 +20,7 @@ void vecAddPerfTest()
     for(auto const &[vec_add, desc]: vec)
     {
         auto const res = std::get<1>(vec_add.run(a, b));
-        std::cout << desc << ": " << res.kernel_duration_ms << " milli seconds." << std::endl;
+        std::cout << desc << ": " << res.duration_ms << " milli seconds." << std::endl;
     }
     std::cout << "Performance test for vector addition: end" << std::endl;
 }

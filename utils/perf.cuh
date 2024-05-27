@@ -3,18 +3,14 @@
 
 #include <string>
 #include <vector>
+#include <map>
 
-struct PerfInfo
+struct kernelPerfInfo
 {
-    float kernel_duration_ms;
+    float duration_ms;
 };
+using PerfTestResult = std::map<std::string, std::vector<float>>;
 
-struct PerfTestResult
-{
-    std::string label;
-    // Performance metric of each run or repetition.
-    std::vector<float> metric_vals;
-};
 
 #endif //PERF_CUH
 

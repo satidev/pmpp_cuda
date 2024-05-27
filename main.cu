@@ -1,7 +1,7 @@
 #include <iostream>
 #include "best_practices_nvidia/mat_transpose/perf_test.cuh"
 #include <dlib/cmd_line_parser.h>
-#include "plot.h"
+#include "perf_test_analyzer.h"
 
 int main(int argc, char** argv)
 {
@@ -37,8 +37,9 @@ int main(int argc, char** argv)
 
         if (action == "mat-transpose") {
             auto const perf_info = BPNV::transposePerfTest(num_repetitions);
-            plotTime(perf_info, output_dir);
-            plotPerfBoost(perf_info, output_dir);
+            auto const analyzer = PerfTestAnalyzer{perf_info};
+            analyzer.plotPerfMetric(output_dir);
+            analyzer.plotPerfBoostInfo(output_dir, "naive");
         }
         else {
             std::cerr << "Invalid action operation." << std::endl;

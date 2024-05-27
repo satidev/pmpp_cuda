@@ -35,7 +35,7 @@ void matMulPerfTest()
 
     for (auto const &[mat_mul, desc]: mat_mul_vec) {
         auto const res = mat_mul.run(first, sec);
-        std::cout << desc << ": " << std::get<1>(res).kernel_duration_ms << " milli seconds."
+        std::cout << desc << ": " << std::get<1>(res).duration_ms << " milli seconds."
                   << std::endl;
     }
     std::cout << "Performance test for matrix multiplication: end" << std::endl;

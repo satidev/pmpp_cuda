@@ -26,13 +26,13 @@ public:
         impl_{std::move(impl)}
     {}
 
-    std::tuple<dlib::matrix<T>, PerfInfo> run(dlib::matrix<T> const &first,
-                                              dlib::matrix<T> const &sec) const;
+    std::tuple<dlib::matrix<T>, kernelPerfInfo> run(dlib::matrix<T> const &first,
+                                                    dlib::matrix<T> const &sec) const;
 };
 
 template<typename T>
-std::tuple<dlib::matrix<T>, PerfInfo> MatMul<T>::run(dlib::matrix<T> const &first,
-                                                     dlib::matrix<T> const &sec) const
+std::tuple<dlib::matrix<T>, kernelPerfInfo> MatMul<T>::run(dlib::matrix<T> const &first,
+                                                           dlib::matrix<T> const &sec) const
 {
     if (first.nc() != sec.nr()) {
         throw std::invalid_argument{"Invalid size for matrix multiplication."};
@@ -69,7 +69,7 @@ std::tuple<dlib::matrix<T>, PerfInfo> MatMul<T>::run(dlib::matrix<T> const &firs
     return std::make_tuple(dlib::mat(HostDevCopy::hostCopy(res_dev).data(),
                                      first.nr(),
                                      sec.nc()),
-                           PerfInfo{time_taken});
+                           kernelPerfInfo{time_taken});
 }
 
 void matMulPerfTest();

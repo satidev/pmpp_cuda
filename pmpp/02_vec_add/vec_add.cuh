@@ -22,13 +22,13 @@ public:
     explicit VectorAdd(std::unique_ptr<VecAddImplStrategy<T>> impl)
         : impl_{std::move(impl)}
     {}
-    std::tuple<std::vector<T>, PerfInfo> run(std::vector<T> const &first,
-                                             std::vector<T> const &sec) const;
+    std::tuple<std::vector<T>, kernelPerfInfo> run(std::vector<T> const &first,
+                                                   std::vector<T> const &sec) const;
 };
 
 template<typename T>
-std::tuple<std::vector<T>, PerfInfo> VectorAdd<T>::run(std::vector<T> const &first,
-                                                       std::vector<T> const &sec) const
+std::tuple<std::vector<T>, kernelPerfInfo> VectorAdd<T>::run(std::vector<T> const &first,
+                                                             std::vector<T> const &sec) const
 {
     if (std::size(first) != std::size(sec)) {
         throw std::invalid_argument{"The vectors must have the same size"};
@@ -45,7 +45,7 @@ std::tuple<std::vector<T>, PerfInfo> VectorAdd<T>::run(std::vector<T> const &fir
     impl_->launchKernel(first_dev.data(), sec_dev.data(),
                         res_dev.data(), num_elems);
     auto const time = timer.toc();
-    return std::make_tuple(HostDevCopy::hostCopy(res_dev), PerfInfo{time});
+    return std::make_tuple(HostDevCopy::hostCopy(res_dev), kernelPerfInfo{time});
 }
 
 void vecAddPerfTest();

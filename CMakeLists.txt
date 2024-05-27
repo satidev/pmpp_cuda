@@ -84,8 +84,8 @@ target_link_libraries(cuda_lib cublas)
 target_link_libraries(cuda_lib dlib)
 
 add_executable(run_perf_tests main.cu
-        plot.h
-        plot.cpp)
+        perf_test_analyzer.h
+        perf_test_analyzer.cpp)
 set_target_properties(run_perf_tests PROPERTIES CUDA_SEPARABLE_COMPILATION OFF)
 target_compile_options(run_perf_tests PRIVATE $<$<COMPILE_LANGUAGE:CUDA>:
         --generate-line-info

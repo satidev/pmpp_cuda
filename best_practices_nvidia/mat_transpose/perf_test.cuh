@@ -9,6 +9,6 @@
 
 namespace BPNV
 {
-std::vector<PerfTestResult> transposePerfTest(unsigned num_rep = 10u);
+PerfTestResult transposePerfTest(unsigned num_rep = 10u);
 }// BPNV namespace.
 #endif //PERF_TEST_CUH
