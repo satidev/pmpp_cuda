@@ -2,6 +2,8 @@
 #include "best_practices_nvidia/mat_transpose/perf_test.cuh"
 #include <dlib/cmd_line_parser.h>
 #include "perf_test_analyzer.h"
+#include "best_practices_nvidia/mem_optim/mem_bandwidth.cuh"
+#include "best_practices_nvidia/mem_optim/copy_execute_latency.cuh"
 
 int main(int argc, char** argv)
 {
@@ -40,6 +42,20 @@ int main(int argc, char** argv)
             auto const analyzer = PerfTestAnalyzer{perf_info};
             analyzer.plotPerfMetric(output_dir, "Kernel execution time", "Milli seconds");
             analyzer.plotPerfBoostInfo(output_dir, "naive");
+        }
+        else if (action == "mem-bandwidth") {
+            using namespace BPNV::MemoryBandwidth;
+            auto const perf_info = runPerfTest(num_repetitions);
+            auto const analyzer = PerfTestAnalyzer{perf_info};
+            analyzer.plotPerfMetric(output_dir, "Memory bandwidth", "GB/sec");
+
+        }
+        else if(action == "copy-kernel_copy"){
+            using namespace BPNV::CopyExecuteLatency;
+            auto const perf_info = runPerfTest(num_repetitions);
+            auto const analyzer = PerfTestAnalyzer{perf_info};
+            analyzer.plotPerfMetric(output_dir, "Copy-Kernel-Copy", "milli seconds");
+            analyzer.plotPerfBoostInfo(output_dir, "seq-pageable");
         }
         else {
             std::cerr << "Invalid action operation." << std::endl;

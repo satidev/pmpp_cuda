@@ -1,10 +1,9 @@
-#include <numeric>
 #include "copy_execute_latency.cuh"
 #include "../../utils/dev_timer.cuh"
 #include "../../utils/check_error.cuh"
 #include "../../utils/exec_config.cuh"
 
-namespace CopyExecuteLatency
+namespace BPNV::CopyExecuteLatency
 {
 __global__ void sqKernel(float const *ip, float *op,
                          unsigned num_elems)
@@ -15,7 +14,7 @@ __global__ void sqKernel(float const *ip, float *op,
     }
 }
 
-float seqCopyExecutePageable(unsigned num_elems)
+MilliSeconds seqCopyExecutePageable(unsigned num_elems)
 {
     // Allocate input data in host memory.
     auto constexpr init_val = 2.0f;
@@ -28,8 +27,8 @@ float seqCopyExecutePageable(unsigned num_elems)
                "allocating device memory for input data");
 
     // Allocate device memory for the result.
-    auto output_dat_dev = static_cast<float *>(nullptr);
-    checkError(cudaMalloc(reinterpret_cast<void **>(&output_dat_dev), num_bytes),
+    auto output_data_dev = static_cast<float *>(nullptr);
+    checkError(cudaMalloc(reinterpret_cast<void **>(&output_data_dev), num_bytes),
                "allocating device memory for output data");
 
     // Allocate the host memory for the result.
@@ -48,11 +47,11 @@ float seqCopyExecutePageable(unsigned num_elems)
                "copying data to device");
     // Execute the kernel.
     sqKernel<<<exec_params.grid_dim, exec_params.block_dim>>>(
-        input_dat_dev, output_dat_dev, num_elems);
+        input_dat_dev, output_data_dev, num_elems);
 
     // Copy the result from the device to the host.
     checkError(cudaMemcpy(res_host.data(),
-                          output_dat_dev,
+                          output_data_dev,
                           num_bytes,
                           cudaMemcpyDeviceToHost),
                "copying data to host");
@@ -60,12 +59,9 @@ float seqCopyExecutePageable(unsigned num_elems)
     cudaDeviceSynchronize();
     auto const duration = timer.toc();
     cudaFree(input_dat_dev);
-    cudaFree(output_dat_dev);
+    cudaFree(output_data_dev);
 
-    // Check the output results by computing the mean.
-    auto const mean = std::accumulate(std::begin(res_host), std::end(res_host), 0.0f) /
-        static_cast<float>(num_elems);
-    if (mean != init_val * init_val) {
+    if (!Detail::hasSameVal(res_host, init_val * init_val)) {
         std::cerr << "Error: Kernel execution failed\n";
         std::exit(1);
     }
@@ -73,9 +69,8 @@ float seqCopyExecutePageable(unsigned num_elems)
     return duration;
 }
 
-float seqCopyExecuteUnified(unsigned num_elems)
+MilliSeconds seqCopyExecuteUnified(unsigned num_elems)
 {
-
     auto constexpr init_val = 2.0f;
 
     // Allocate input data in unified memory that can be
@@ -87,9 +82,6 @@ float seqCopyExecuteUnified(unsigned num_elems)
     for (auto i = 0u; i < num_elems; ++i) {
         input_data[i] = init_val;
     }
-
-    //checkError(cudaMemset(input_data, init_val, num_bytes),
-    //           "initializing unified memory for input data");
 
     // Allocate unified memory for the result.
     auto output_data = static_cast<float *>(nullptr);
@@ -105,14 +97,8 @@ float seqCopyExecuteUnified(unsigned num_elems)
         input_data, output_data, num_elems);
     cudaDeviceSynchronize();
     auto const duration = timer.toc();
-    // Check the output results by computing the mean.
-    auto mean = 0.0f;
-    for (auto i = 0u; i < num_elems; ++i) {
-        mean += output_data[i];
-    }
-    mean /= static_cast<float>(num_elems);
-    if (mean != init_val * init_val) {
-        std::cout << "Mean: " << mean << std::endl;
+
+    if (!Detail::hasSameVal(std::span < float > {output_data, num_elems}, init_val * init_val)) {
         std::cerr << "Error: Kernel execution failed\n";
         std::exit(1);
     }
@@ -124,7 +110,7 @@ float seqCopyExecuteUnified(unsigned num_elems)
     return duration;
 }
 
-float seqCopyExecutePinned(unsigned num_elems)
+MilliSeconds seqCopyExecutePinned(unsigned num_elems)
 {
     // Allocate input data in host memory.
     auto constexpr init_val = 2.0f;
@@ -135,13 +121,13 @@ float seqCopyExecutePinned(unsigned num_elems)
 
     // Allocate input data in device memory and transfer the data.
     auto const num_bytes = num_elems * sizeof(float);
-    auto input_dat_dev = static_cast<float *>(nullptr);
-    checkError(cudaMalloc(reinterpret_cast<void **>(&input_dat_dev), num_bytes),
+    auto input_data_dev = static_cast<float *>(nullptr);
+    checkError(cudaMalloc(reinterpret_cast<void **>(&input_data_dev), num_bytes),
                "allocating device memory for input data");
 
     // Allocate device memory for the result.
-    auto output_dat_dev = static_cast<float *>(nullptr);
-    checkError(cudaMalloc(reinterpret_cast<void **>(&output_dat_dev), num_bytes),
+    auto output_data_dev = static_cast<float *>(nullptr);
+    checkError(cudaMalloc(reinterpret_cast<void **>(&output_data_dev), num_bytes),
                "allocating device memory for output data");
 
     // Allocate the host memory for the result.
@@ -156,18 +142,18 @@ float seqCopyExecutePinned(unsigned num_elems)
     timer.tic();
 
     // Copy the input data to the device.
-    checkError(cudaMemcpyAsync(input_dat_dev,
+    checkError(cudaMemcpyAsync(input_data_dev,
                                input_data_host.data(),
                                num_bytes,
                                cudaMemcpyHostToDevice),
                "copying data to device");
     // Execute the kernel.
     sqKernel<<<exec_params.grid_dim, exec_params.block_dim>>>(
-        input_dat_dev, output_dat_dev, num_elems);
+        input_data_dev, output_data_dev, num_elems);
 
     // Copy the result from the device to the host.
     checkError(cudaMemcpyAsync(res_host.data(),
-                               output_dat_dev,
+                               output_data_dev,
                                num_bytes,
                                cudaMemcpyDeviceToHost),
                "copying data to host");
@@ -176,17 +162,14 @@ float seqCopyExecutePinned(unsigned num_elems)
     auto const duration = timer.toc();
 
     // Clean up.
-    cudaFree(input_dat_dev);
-    cudaFree(output_dat_dev);
+    cudaFree(input_data_dev);
+    cudaFree(output_data_dev);
     checkError(cudaHostUnregister((void *) input_data_host.data()),
                "unregistering input data host memory");
     checkError(cudaHostUnregister((void *) res_host.data()),
                "unregistering input data host memory");
 
-    // Check the output results by computing the mean.
-    auto const mean = std::accumulate(std::begin(res_host), std::end(res_host), 0.0f) /
-        static_cast<float>(num_elems);
-    if (mean != init_val * init_val) {
+    if (!Detail::hasSameVal(res_host, init_val * init_val)) {
         std::cerr << "Error: Kernel execution failed\n";
         std::exit(1);
     }
@@ -194,7 +177,7 @@ float seqCopyExecutePinned(unsigned num_elems)
     return duration;
 }
 
-float stagedConcurrentCopyExecute(unsigned num_elems, unsigned num_streams)
+MilliSeconds stagedConcurrentCopyExecute(unsigned num_elems, unsigned num_streams)
 {
     // Allocate input data in host memory.
     auto constexpr init_val = 2.0f;
@@ -211,8 +194,8 @@ float stagedConcurrentCopyExecute(unsigned num_elems, unsigned num_streams)
                "allocating device memory for input data");
 
     // Allocate device memory for the result.
-    auto output_dat_dev = static_cast<float *>(nullptr);
-    checkError(cudaMalloc(reinterpret_cast<void **>(&output_dat_dev), num_byte_stream),
+    auto output_data_dev = static_cast<float *>(nullptr);
+    checkError(cudaMalloc(reinterpret_cast<void **>(&output_data_dev), num_byte_stream),
                "allocating device memory for output data");
 
     // Allocate the host memory for the result.
@@ -245,10 +228,10 @@ float stagedConcurrentCopyExecute(unsigned num_elems, unsigned num_streams)
                    "copying data to device");
         // Execute the kernel.
         sqKernel<<<exec_params.grid_dim, exec_params.block_dim, 0, streams[i]>>>(
-            input_dat_dev, output_dat_dev, num_elem_stream);
+            input_dat_dev, output_data_dev, num_elem_stream);
         // Copy the result from the device to the host.
         checkError(cudaMemcpyAsync(res_host.data() + offset,
-                                   output_dat_dev,
+                                   output_data_dev,
                                    num_byte_stream,
                                    cudaMemcpyDeviceToHost,
                                    streams[i]),
@@ -263,16 +246,13 @@ float stagedConcurrentCopyExecute(unsigned num_elems, unsigned num_streams)
         cudaStreamDestroy(stream);
     }
     cudaFree(input_dat_dev);
-    cudaFree(output_dat_dev);
+    cudaFree(output_data_dev);
     checkError(cudaHostUnregister((void *) input_data_host.data()),
                "unregistering input data host memory");
     checkError(cudaHostUnregister((void *) res_host.data()),
                "unregistering input data host memory");
 
-    // Check the output results by computing the mean.
-    auto const mean = std::accumulate(std::begin(res_host), std::end(res_host), 0.0f) /
-        static_cast<float>(num_elems);
-    if (mean != init_val * init_val) {
+    if (!Detail::hasSameVal(res_host, init_val * init_val)) {
         std::cerr << "Error: Kernel execution failed\n";
         std::exit(1);
     }
@@ -280,7 +260,7 @@ float stagedConcurrentCopyExecute(unsigned num_elems, unsigned num_streams)
     return duration;
 }
 
-float zeroCopyExecute(unsigned num_elems)
+MilliSeconds zeroCopyExecute(unsigned num_elems)
 {
     // Allocate input data in host memory.
     auto constexpr init_val = 2.0f;
@@ -321,19 +301,10 @@ float zeroCopyExecute(unsigned num_elems)
     auto const duration = timer.toc();
 
 
-    // Check the output results by computing the mean.
-    auto mean = 0.0f;
-    for (auto i = 0u; i < num_elems; ++i) {
-        mean += res_dev[i];
-    }
-    mean /= static_cast<float>(num_elems);
-    if (mean != init_val * init_val) {
-        std::cout << "Mean: " << mean << std::endl;
+    if (!Detail::hasSameVal(std::span < float > {res_dev, num_elems}, init_val * init_val)) {
         std::cerr << "Error: Kernel execution failed\n";
         std::exit(1);
     }
-
-
 
     // Clean up.
     // Deregister the host memory.
@@ -345,22 +316,30 @@ float zeroCopyExecute(unsigned num_elems)
     return duration;
 }
 
-void runPerfTest()
+PerfTestResult runPerfTest(unsigned num_rep)
 {
     auto constexpr num_elems = 1u << 24;
-    std::cout << "Sequential copy and execute (pageable):: "
-              << seqCopyExecutePageable(num_elems) << " sec" << std::endl;
-    std::cout << "Sequential copy and execute (pinned):: "
-              << seqCopyExecutePinned(num_elems) << " sec" << std::endl;
-    std::cout << "Sequential copy and execute (unified):: "
-              << seqCopyExecuteUnified(num_elems) << " sec" << std::endl;
+    auto perf_info = PerfTestResult{};
 
-    std::cout << "Zero-copy and execute:: "
-              << zeroCopyExecute(num_elems) << " sec" << std::endl;
-
-    auto constexpr num_streams = 256u;
-    std::cout << "Staged concurrent copy and execute :: "
-              << stagedConcurrentCopyExecute(num_elems, num_streams) << " sec" << std::endl;
+    for (auto i = 0u; i < num_rep; ++i) {
+        perf_info["seq-pageable"].emplace_back(seqCopyExecutePageable(num_elems).count());
+        perf_info["seq-unified"].emplace_back(seqCopyExecuteUnified(num_elems).count());
+        perf_info["seq-pinned"].emplace_back(seqCopyExecutePinned(num_elems).count());
+        perf_info["seq-zero-copy"].emplace_back(zeroCopyExecute(num_elems).count());
+        perf_info["staged-concurrent"].emplace_back(
+            stagedConcurrentCopyExecute(num_elems, 256u).count());
+    }
+    return perf_info;
 }
 
+namespace Detail
+{
+bool hasSameVal(std::span<float> vec, float val)
+{
+    // Check if all the elements in the vector have the same value.
+    return std::all_of(std::begin(vec), std::end(vec),
+                       [val](float elem)
+                       { return elem == val; });
+}
+}// Detail namespace.
 }// Latency namespace.

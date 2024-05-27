@@ -17,7 +17,7 @@ void DevTimer::tic()
     checkError(cudaEventRecord(start_), "cudaEventRecord");
 }
 
-float DevTimer::toc()
+MilliSeconds DevTimer::toc()
 {
     checkError(cudaEventRecord(stop_), "cudaEventRecord for timer stop function");
     checkError(cudaEventSynchronize(stop_), "cudaEventSynchronize for timer stop function");
@@ -25,6 +25,6 @@ float DevTimer::toc()
     auto elapsed_time_ms = 0.0f;
     checkError(cudaEventElapsedTime(&elapsed_time_ms, start_, stop_),
                "timer's elapsed time computation");
-    return elapsed_time_ms;
+    return MilliSeconds{elapsed_time_ms};
 }
 

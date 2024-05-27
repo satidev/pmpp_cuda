@@ -1,7 +1,9 @@
 #ifndef DEV_TIMER_CUH
 #define DEV_TIMER_CUH
 
-//Timer for cuda events and kernels.
+#include "perf.cuh"
+
+// Timer for cuda events and kernels.
 class DevTimer
 {
 public:
@@ -9,10 +11,10 @@ public:
     DevTimer();
     ~DevTimer();
 
-    //Start the clock.
+    // Start the clock.
     void tic();
-    //End the clock and return elapsed time in seconds.
-    float toc();
+    // End the clock and return elapsed time.
+    MilliSeconds toc();
 
 private:
     cudaEvent_t start_;

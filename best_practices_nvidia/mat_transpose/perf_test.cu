@@ -35,7 +35,7 @@ PerfTestResult transposePerfTest(unsigned num_rep)
         auto perf_vec = std::vector<float>{};
         for (auto run_idx = 0u; run_idx < num_rep; ++run_idx) {
             auto const res = trans.run(input);
-            perf_vec.emplace_back(std::get<1>(res).duration_ms);
+            perf_vec.emplace_back(std::get<1>(res).exec_duration.count());
         }
         perf_res[desc] = perf_vec;
     }
