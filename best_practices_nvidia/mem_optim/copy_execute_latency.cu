@@ -2,6 +2,7 @@
 #include "../../utils/dev_timer.cuh"
 #include "../../utils/check_error.cuh"
 #include "../../utils/exec_config.cuh"
+#include "../../utils/stream_adaptor.cuh"
 
 namespace BPNV::CopyExecuteLatency
 {
@@ -205,10 +206,7 @@ MilliSeconds stagedConcurrentCopyExecute(unsigned num_elems, unsigned num_stream
                "registering result host memory");
 
     // Allocate streams.
-    auto streams = std::vector<cudaStream_t>(num_streams);
-    for (auto &stream: streams) {
-        checkError(cudaStreamCreate(&stream), "creating stream");
-    }
+    auto streams = std::vector<StreamAdaptor>(num_streams);
 
     auto const exec_params = ExecConfig::getParams(num_elem_stream,
                                                    sqKernel, 0u);
@@ -224,17 +222,17 @@ MilliSeconds stagedConcurrentCopyExecute(unsigned num_elems, unsigned num_stream
                                    input_data_host.data() + offset,
                                    num_byte_stream,
                                    cudaMemcpyHostToDevice,
-                                   streams[i]),
+                                   streams[i].getStream()),
                    "copying data to device");
         // Execute the kernel.
-        sqKernel<<<exec_params.grid_dim, exec_params.block_dim, 0, streams[i]>>>(
+        sqKernel<<<exec_params.grid_dim, exec_params.block_dim, 0, streams[i].getStream()>>>(
             input_dat_dev, output_data_dev, num_elem_stream);
         // Copy the result from the device to the host.
         checkError(cudaMemcpyAsync(res_host.data() + offset,
                                    output_data_dev,
                                    num_byte_stream,
                                    cudaMemcpyDeviceToHost,
-                                   streams[i]),
+                                   streams[i].getStream()),
                    "copying data to host");
     }
 
@@ -242,9 +240,6 @@ MilliSeconds stagedConcurrentCopyExecute(unsigned num_elems, unsigned num_stream
     auto const duration = timer.toc();
 
     // Clean up.
-    for (auto &stream: streams) {
-        cudaStreamDestroy(stream);
-    }
     cudaFree(input_dat_dev);
     cudaFree(output_data_dev);
     checkError(cudaHostUnregister((void *) input_data_host.data()),

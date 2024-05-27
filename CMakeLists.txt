@@ -78,6 +78,7 @@ add_library(cuda_lib
         best_practices_nvidia/mat_transpose/trans_impl_sm_swizzling.cuh
         best_practices_nvidia/mat_transpose/perf_test.cuh
         best_practices_nvidia/mat_transpose/perf_test.cu
+        utils/stream_adaptor.cuh
 )
 target_include_directories(cuda_lib PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/external)
 target_link_libraries(cuda_lib cublas)
