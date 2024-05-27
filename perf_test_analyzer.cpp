@@ -3,21 +3,13 @@
 #include "matplotlibcpp.h"
 #include <filesystem>
 
-void PerfTestAnalyzer::plotPerfMetric(std::string const &output_dir_name) const
+void PerfTestAnalyzer::plotPerfMetric(std::string const &output_dir_name,
+                                      std::string const &title,
+                                      std::string const &ylabel) const
 {
     auto const [labels, data] = getBoxPlotData();
-
-    auto keywords = std::map<std::string, std::string>{};
-    keywords["font.size"] = "24";
-    keywords["boxplot.boxprops.linewidth"] = "3";
-    keywords["boxplot.meanprops.linewidth"] = "3";
-    keywords["boxplot.medianprops.color"] = "red";
-    keywords["boxplot.medianprops.linewidth"] = "3";
-
-    matplotlibcpp::rcparams(keywords);
-    matplotlibcpp::figure_size(1200, 780);
-    matplotlibcpp::title("Kernel execution time");
-    matplotlibcpp::ylabel("Time (ms)");
+    matplotlibcpp::title(title);
+    matplotlibcpp::ylabel(ylabel);
     matplotlibcpp::boxplot(data, labels);
 
     // If the output directory does not exist, show the plot
@@ -34,15 +26,9 @@ void PerfTestAnalyzer::plotPerfBoostInfo(std::string const &output_dir_name,
                                          std::string const & ref_impl) const
 {
     auto const perf_boost_info = getPerfBoostInfo(ref_impl);
-
-    auto keywords = std::map<std::string, std::string>{};
-    keywords["font.size"] = "24";
-    keywords["lines.linewidth"] = "5";
-
-    matplotlibcpp::rcparams(keywords);
-    matplotlibcpp::figure_size(1200, 780);
-    matplotlibcpp::title("Performance boost after optimization (%)");
-    matplotlibcpp::xlabel("Run");
+    matplotlibcpp::title("Performance boost after optimization");
+    matplotlibcpp::xlabel("Iteration index");
+    matplotlibcpp::ylabel("%");
 
     for (auto const &[label, perf_boost]: perf_boost_info) {
         matplotlibcpp::named_plot(label, perf_boost);
@@ -94,5 +80,17 @@ PerfTestResult PerfTestAnalyzer::getPerfBoostInfo(std::string const &ref_impl) c
         perf_boost_info[label] =  std::move(boost_vec);
     }
     return perf_boost_info;
+}
+void PerfTestAnalyzer::setPlotParams() const
+{
+    auto keywords = std::map<std::string, std::string>{};
+    keywords["font.size"] = "24";
+    keywords["boxplot.boxprops.linewidth"] = "3";
+    keywords["boxplot.meanprops.linewidth"] = "3";
+    keywords["boxplot.medianprops.color"] = "red";
+    keywords["boxplot.medianprops.linewidth"] = "3";
+    keywords["lines.linewidth"] = "5";
+    matplotlibcpp::rcparams(keywords);
+    matplotlibcpp::figure_size(1200, 780);
 }
 

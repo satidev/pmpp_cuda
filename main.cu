@@ -38,7 +38,7 @@ int main(int argc, char** argv)
         if (action == "mat-transpose") {
             auto const perf_info = BPNV::transposePerfTest(num_repetitions);
             auto const analyzer = PerfTestAnalyzer{perf_info};
-            analyzer.plotPerfMetric(output_dir);
+            analyzer.plotPerfMetric(output_dir, "Kernel execution time", "Milli seconds");
             analyzer.plotPerfBoostInfo(output_dir, "naive");
         }
         else {

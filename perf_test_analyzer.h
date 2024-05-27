@@ -15,8 +15,12 @@ public:
     explicit PerfTestAnalyzer(PerfTestResult info)
         :
         info_{std::move(info)}
-    {}
-    void plotPerfMetric(std::string const &output_dir_name) const;
+    {
+        setPlotParams();
+    }
+    void plotPerfMetric(std::string const &output_dir_name,
+                        std::string const &title,
+                        std::string const &ylabel) const;
     void plotPerfBoostInfo(std::string const &output_dir_name,
                            std::string const & ref_impl) const;
 
@@ -28,6 +32,7 @@ private:
     };
     BoxPlotData getBoxPlotData() const;
     PerfTestResult getPerfBoostInfo(std::string const &ref_impl) const;
+    void setPlotParams() const;
 };
 
 #endif //PERF_TEST_ANALYZER_H
