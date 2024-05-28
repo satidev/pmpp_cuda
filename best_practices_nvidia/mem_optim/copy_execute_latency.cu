@@ -244,6 +244,31 @@ PerfTestResult runPerfTest(unsigned num_rep)
     return perf_info;
 }
 
+PerfTestResult stagedCopyNumStreamsTest(unsigned num_rep)
+{
+    auto constexpr num_elems = 1u << 24;
+    auto perf_info = PerfTestResult{};
+
+    for (auto i = 0u; i < num_rep; ++i) {
+        perf_info["seq-pageable"].emplace_back(seqCopyExecutePageable(num_elems).count());
+        perf_info["2"].emplace_back(
+            stagedConcurrentCopyExecute(num_elems, 2u).count());
+        perf_info["4"].emplace_back(
+            stagedConcurrentCopyExecute(num_elems, 4u).count());
+        perf_info["16"].emplace_back(
+            stagedConcurrentCopyExecute(num_elems, 16u).count());
+        perf_info["32"].emplace_back(
+            stagedConcurrentCopyExecute(num_elems, 16u).count());
+        perf_info["128"].emplace_back(
+            stagedConcurrentCopyExecute(num_elems, 128u).count());
+        perf_info["256"].emplace_back(
+            stagedConcurrentCopyExecute(num_elems, 256u).count());
+        perf_info["512"].emplace_back(
+            stagedConcurrentCopyExecute(num_elems, 512u).count());
+    }
+    return perf_info;
+}
+
 namespace Detail
 {
 bool hasSameVal(std::span<float> vec, float val)

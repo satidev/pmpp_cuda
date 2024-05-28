@@ -25,6 +25,8 @@ namespace BPNV::CopyExecuteLatency
 
     PerfTestResult runPerfTest(unsigned num_rep);
 
+    PerfTestResult stagedCopyNumStreamsTest(unsigned num_rep);
+
 namespace Detail
 {
 bool hasSameVal(std::span<float> vec, float val);

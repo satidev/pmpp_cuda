@@ -50,11 +50,18 @@ int main(int argc, char** argv)
             analyzer.plotPerfMetric(output_dir, "Memory bandwidth", "GB/sec");
 
         }
-        else if(action == "copy-kernel-copy"){
+        else if(action == "copy-kernel-copy") {
             using namespace BPNV::CopyExecuteLatency;
             auto const perf_info = runPerfTest(num_repetitions);
             auto const analyzer = PerfTestAnalyzer{perf_info};
             analyzer.plotPerfMetric(output_dir, "Copy-Kernel-Copy", "milli seconds");
+            analyzer.plotPerfBoostInfo(output_dir, "seq-pageable");
+        }
+        else if(action == "staged-copy-streams") {
+            using namespace BPNV::CopyExecuteLatency;
+            auto const perf_info = stagedCopyNumStreamsTest(num_repetitions);
+            auto const analyzer = PerfTestAnalyzer{perf_info};
+            analyzer.plotPerfMetric(output_dir, "Staged copy: number of streams", "milli seconds");
             analyzer.plotPerfBoostInfo(output_dir, "seq-pageable");
         }
         else {
