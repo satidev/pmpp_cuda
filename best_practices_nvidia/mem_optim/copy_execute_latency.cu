@@ -140,18 +140,18 @@ MilliSeconds stagedConcurrentCopyExecute(unsigned num_elems, unsigned num_stream
 {
     // Allocate input data in host memory.
     auto constexpr init_val = 2.0f;
-    auto input_data_host = PinnedVec<float>{std::vector<float>(num_elems, init_val)};
+    auto const input_host = PinnedVec<float>{std::vector<float>(num_elems, init_val)};
 
     // Allocate input data in device memory and transfer the data.
     auto const num_elem_stream = num_elems / num_streams;
     auto const num_byte_stream = num_elem_stream * sizeof(float);
-    auto input_dat_dev = static_cast<float *>(nullptr);
-    checkError(cudaMalloc(reinterpret_cast<void **>(&input_dat_dev), num_byte_stream),
+    auto input_dev = static_cast<float *>(nullptr);
+    checkError(cudaMalloc(reinterpret_cast<void **>(&input_dev), num_byte_stream),
                "allocating device memory for input data");
 
     // Allocate device memory for the result.
-    auto output_data_dev = static_cast<float *>(nullptr);
-    checkError(cudaMalloc(reinterpret_cast<void **>(&output_data_dev), num_byte_stream),
+    auto output_dev = static_cast<float *>(nullptr);
+    checkError(cudaMalloc(reinterpret_cast<void **>(&output_dev), num_byte_stream),
                "allocating device memory for output data");
 
     // Allocate the host memory for the result.
@@ -170,18 +170,18 @@ MilliSeconds stagedConcurrentCopyExecute(unsigned num_elems, unsigned num_stream
     for (auto i = 0u; i < num_streams; ++i) {
         // Copy the input data to the device.
         auto const offset = i * num_elem_stream;
-        checkError(cudaMemcpyAsync(input_dat_dev,
-                                   input_data_host.data() + offset,
+        checkError(cudaMemcpyAsync(input_dev,
+                                   input_host.data() + offset,
                                    num_byte_stream,
                                    cudaMemcpyHostToDevice,
                                    streams[i].getStream()),
                    "copying data to device");
         // Execute the kernel.
         sqKernel<<<exec_params.grid_dim, exec_params.block_dim, 0, streams[i].getStream()>>>(
-            input_dat_dev, output_data_dev, num_elem_stream);
+            input_dev, output_dev, num_elem_stream);
         // Copy the result from the device to the host.
         checkError(cudaMemcpyAsync(res_host.data() + offset,
-                                   output_data_dev,
+                                   output_dev,
                                    num_byte_stream,
                                    cudaMemcpyDeviceToHost,
                                    streams[i].getStream()),
@@ -192,8 +192,8 @@ MilliSeconds stagedConcurrentCopyExecute(unsigned num_elems, unsigned num_stream
     auto const duration = timer.toc();
 
     // Clean up.
-    cudaFree(input_dat_dev);
-    cudaFree(output_data_dev);
+    cudaFree(input_dev);
+    cudaFree(output_dev);
 
     if (!Detail::hasSameVal(std::span < float > {res_host.data(), res_host.size()},
                             init_val * init_val)) {
