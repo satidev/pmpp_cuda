@@ -10,12 +10,12 @@
 
 namespace BPNV::CopyExecuteLatency
 {
-__global__ void sqKernel(float const *ip, float *op,
+__global__ void sqKernel(float const *input, float *output,
                          unsigned num_elems)
 {
     auto const idx = blockIdx.x * blockDim.x + threadIdx.x;
     if (idx < num_elems) {
-        op[idx] = ip[idx] * ip[idx];
+        output[idx] = input[idx] * input[idx];
     }
 }
 
@@ -23,50 +23,30 @@ MilliSeconds seqCopyExecutePageable(unsigned num_elems)
 {
     // Allocate input data in host memory.
     auto constexpr init_val = 2.0f;
-    auto const input_data_host = std::vector<float>(num_elems, init_val);
+    auto const input_host = std::vector<float>(num_elems, init_val);
 
-    // Allocate input data in device memory and transfer the data.
-    auto const num_bytes = num_elems * sizeof(float);
-    auto input_dat_dev = static_cast<float *>(nullptr);
-    checkError(cudaMalloc(reinterpret_cast<void **>(&input_dat_dev), num_bytes),
-               "allocating device memory for input data");
+    // Allocate device memory for the input data.
+    auto input_dev = DevVector<float>{num_elems};
 
-    // Allocate device memory for the result.
-    auto output_data_dev = static_cast<float *>(nullptr);
-    checkError(cudaMalloc(reinterpret_cast<void **>(&output_data_dev), num_bytes),
-               "allocating device memory for output data");
+    // Allocate memory for the result in the host and device.
+    auto output_host = std::vector<float>(num_elems);
+    auto output_dev = DevVector<float>{num_elems};
 
-    // Allocate the host memory for the result.
-    auto res_host = std::vector<float>(num_elems);
     auto const exec_params = ExecConfig::getParams(num_elems, sqKernel, 0u);
 
     cudaDeviceSynchronize();
     auto timer = DevTimer{};
     timer.tic();
 
-    // Copy the input data to the device.
-    checkError(cudaMemcpy(input_dat_dev,
-                          input_data_host.data(),
-                          num_bytes,
-                          cudaMemcpyHostToDevice),
-               "copying data to device");
-    // Execute the kernel.
+    HostDevCopy::copyToDevice(input_dev, input_host);
     sqKernel<<<exec_params.grid_dim, exec_params.block_dim>>>(
-        input_dat_dev, output_data_dev, num_elems);
-
-    // Copy the result from the device to the host.
-    checkError(cudaMemcpy(res_host.data(),
-                          output_data_dev,
-                          num_bytes,
-                          cudaMemcpyDeviceToHost),
-               "copying data to host");
+        input_dev.data(), output_dev.data(), num_elems);
+    HostDevCopy::copyToHost(output_host, output_dev);
 
     cudaDeviceSynchronize();
     auto const duration = timer.toc();
-    cudaFree(input_dat_dev);
-    cudaFree(output_data_dev);
 
-    if (!Detail::hasSameVal(res_host, init_val * init_val)) {
+    if (!Detail::hasSameVal(output_host, init_val * init_val)) {
         std::cerr << "Error: Kernel execution failed\n";
         std::exit(1);
     }
@@ -76,10 +56,9 @@ MilliSeconds seqCopyExecutePageable(unsigned num_elems)
 
 MilliSeconds seqCopyExecuteUnified(unsigned num_elems)
 {
-    auto constexpr init_val = 2.0f;
-
     // Allocate input data in unified memory that can be
     // accessed by both the host and the device.
+    auto constexpr init_val = 2.0f;
     auto const num_bytes = num_elems * sizeof(float);
     auto input_data = static_cast<float *>(nullptr);
     checkError(cudaMallocManaged(reinterpret_cast<void **>(&input_data), num_bytes),
@@ -92,6 +71,7 @@ MilliSeconds seqCopyExecuteUnified(unsigned num_elems)
     auto output_data = static_cast<float *>(nullptr);
     checkError(cudaMallocManaged(reinterpret_cast<void **>(&output_data), num_bytes),
                "allocating device memory for output data");
+
     auto const exec_params = ExecConfig::getParams(num_elems, sqKernel, 0u);
     // No explicit data transfer is required.
     // Execute the kernel.
@@ -100,6 +80,7 @@ MilliSeconds seqCopyExecuteUnified(unsigned num_elems)
     timer.tic();
     sqKernel<<<exec_params.grid_dim, exec_params.block_dim>>>(
         input_data, output_data, num_elems);
+
     cudaDeviceSynchronize();
     auto const duration = timer.toc();
 
@@ -117,57 +98,36 @@ MilliSeconds seqCopyExecuteUnified(unsigned num_elems)
 
 MilliSeconds seqCopyExecutePinned(unsigned num_elems)
 {
-    // Allocate input data in host memory.
+    // Allocate input data in host pinned memory.
     auto constexpr init_val = 2.0f;
-    auto input_data_host = PinnedVec<float>{std::vector<float>(num_elems, init_val)};
+    auto const input_host = PinnedVec<float>{std::vector<float>(num_elems, init_val)};
 
+    // Allocate device memory for the input data.
+    auto stream_ptr = std::make_shared<StreamAdaptor>();
+    auto input_dev = DevVectorAsync<float>{stream_ptr, num_elems};
 
+    // Allocate memory for the result in the host and device.
+    auto output_host = PinnedVec<float>{std::vector<float>(num_elems)};
+    auto output_dev = DevVectorAsync<float>{stream_ptr, num_elems};
 
-    // Allocate input data in device memory and transfer the data.
-    auto const num_bytes = num_elems * sizeof(float);
-    auto input_data_dev = static_cast<float *>(nullptr);
-    checkError(cudaMalloc(reinterpret_cast<void **>(&input_data_dev), num_bytes),
-               "allocating device memory for input data");
-
-    // Allocate device memory for the result.
-    auto output_data_dev = static_cast<float *>(nullptr);
-    checkError(cudaMalloc(reinterpret_cast<void **>(&output_data_dev), num_bytes),
-               "allocating device memory for output data");
-
-    // Allocate the host memory for the result.
-    auto res_host = PinnedVec<float>{std::vector<float>(num_elems)};
     auto const exec_params = ExecConfig::getParams(num_elems, sqKernel, 0u);
 
     cudaDeviceSynchronize();
     auto timer = DevTimer{};
     timer.tic();
 
-    // Copy the input data to the device.
-    checkError(cudaMemcpyAsync(input_data_dev,
-                               input_data_host.data(),
-                               num_bytes,
-                               cudaMemcpyHostToDevice),
-               "copying data to device");
-    // Execute the kernel.
-    sqKernel<<<exec_params.grid_dim, exec_params.block_dim>>>(
-        input_data_dev, output_data_dev, num_elems);
-
-    // Copy the result from the device to the host.
-    checkError(cudaMemcpyAsync(res_host.data(),
-                               output_data_dev,
-                               num_bytes,
-                               cudaMemcpyDeviceToHost),
-               "copying data to host");
+    HostDevCopy::copyToDevice(input_dev, input_host);
+    sqKernel<<<exec_params.grid_dim, exec_params.block_dim, 0, stream_ptr->getStream()>>>(
+        input_dev.data(), output_dev.data(), num_elems);
+    HostDevCopy::copyToHost(output_host, output_dev);
 
     cudaDeviceSynchronize();
-    auto const duration = timer.toc();
+    auto duration = timer.toc();
 
-    // Clean up.
-    cudaFree(input_data_dev);
-    cudaFree(output_data_dev);
-
-
-    if (!Detail::hasSameVal(std::span<float>{res_host.data(), res_host.size()}, init_val * init_val)) {
+    // Check the results
+    auto constexpr res_val = init_val * init_val;
+    if (!Detail::hasSameVal(std::span < float > {output_host.data(),
+                                                 output_host.size()}, res_val)) {
         std::cerr << "Error: Kernel execution failed\n";
         std::exit(1);
     }
@@ -234,7 +194,8 @@ MilliSeconds stagedConcurrentCopyExecute(unsigned num_elems, unsigned num_stream
     cudaFree(input_dat_dev);
     cudaFree(output_data_dev);
 
-    if (!Detail::hasSameVal(std::span<float>{res_host.data(), res_host.size()}, init_val * init_val)) {
+    if (!Detail::hasSameVal(std::span < float > {res_host.data(), res_host.size()},
+                            init_val * init_val)) {
         std::cerr << "Error: Kernel execution failed\n";
         std::exit(1);
     }
