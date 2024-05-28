@@ -7,6 +7,7 @@
 #include "../../utils/dev_vector_async.cuh"
 #include "../../utils/host_dev_copy.cuh"
 #include "../../utils/pinned_vec.cuh"
+#include "../../utils/mapped_vec.cuh"
 
 namespace BPNV::CopyExecuteLatency
 {
@@ -205,32 +206,9 @@ MilliSeconds stagedConcurrentCopyExecute(unsigned num_elems, unsigned num_stream
 
 MilliSeconds zeroCopyExecute(unsigned num_elems)
 {
-    // Allocate input data in host memory.
     auto constexpr init_val = 2.0f;
-    auto const input_data_host = std::vector<float>(num_elems, init_val);
-
-    // Check the device properties.
-    auto dev_prop = cudaDeviceProp{};
-    checkError(cudaGetDeviceProperties(&dev_prop, 0), "getting device properties");
-    if (!dev_prop.canMapHostMemory) {
-        std::cerr << "Error: Zero copy memory is not supported\n";
-        std::exit(1);
-    }
-
-    checkError(cudaSetDeviceFlags(cudaDeviceMapHost),
-               "setting device flags for zero copy memory");
-    checkError(cudaHostRegister((void *) input_data_host.data(), num_elems * sizeof(float),
-                                cudaHostRegisterMapped),
-               "registering input data host memory");
-    auto input_data_mapped = static_cast<float *>(nullptr);
-    checkError(cudaHostGetDevicePointer((void **) &input_data_mapped,
-                                        (void *) input_data_host.data(), 0),
-               "getting device pointer for mapped memory");
-
-    // Allocate the host memory for the result.
-    auto res_dev = static_cast<float *>(nullptr);
-    checkError(cudaMallocManaged((void **) &res_dev, num_elems * sizeof(float)),
-               "allocating device memory for output data");
+    auto const input_mapped = MappedVec<float>{std::vector<float>(num_elems, init_val)};
+    auto output_mapped = MappedVec<float>{std::vector<float>(num_elems)};
 
     cudaDeviceSynchronize();
     auto timer = DevTimer{};
@@ -238,24 +216,15 @@ MilliSeconds zeroCopyExecute(unsigned num_elems)
 
     auto const exec_params = ExecConfig::getParams(num_elems, sqKernel, 0u);
     sqKernel<<<exec_params.grid_dim, exec_params.block_dim>>>(
-        input_data_mapped, res_dev, num_elems);
+        input_mapped.mappedData(), output_mapped.mappedData(), num_elems);
 
     cudaDeviceSynchronize();
     auto const duration = timer.toc();
 
-
-    if (!Detail::hasSameVal(std::span < float > {res_dev, num_elems}, init_val * init_val)) {
+    if (!Detail::hasSameVal(std::span < float > {output_mapped.data(), num_elems}, init_val * init_val)) {
         std::cerr << "Error: Kernel execution failed\n";
         std::exit(1);
     }
-
-    // Clean up.
-    // Deregister the host memory.
-    checkError(cudaHostUnregister((void *) input_data_host.data()),
-               "unregistering input data host memory");
-    cudaFree(res_dev);
-
-
     return duration;
 }
 
