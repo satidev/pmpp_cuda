@@ -19,7 +19,7 @@ public:
         cudaStreamDestroy(stream);
     }
 
-    cudaStream_t getStream() const
+    cudaStream_t const &getStream() const
     {
         return stream;
     }

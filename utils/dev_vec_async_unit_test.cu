@@ -13,13 +13,13 @@ TEST(MallocFreeAsyncTest, noThrowOnAllocDealloc)
 
 TEST(DevVectorAsyncTest, noExceptionThrownDuringConstruction)
 {
-    auto stream = std::make_shared<StreamAdaptor>();
+    auto stream = StreamAdaptor{};
     ASSERT_NO_THROW((DevVectorAsync<float>{stream, 1024u}));
 }
 
 TEST(DevVectorAsyncTest, dataIsNotNullptrAndSizeIsCorrect)
 {
-    auto stream = std::make_shared<StreamAdaptor>();
+    auto stream = StreamAdaptor{};
     auto dev_vec = DevVectorAsync<float>{stream, 1024u};
     ASSERT_TRUE(dev_vec.data() != nullptr);
     ASSERT_EQ(dev_vec.size(), 1024u);

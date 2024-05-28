@@ -104,12 +104,12 @@ MilliSeconds seqCopyExecutePinned(unsigned num_elems)
     auto const input_host = PinnedVec<float>{std::vector<float>(num_elems, init_val)};
 
     // Allocate device memory for the input data.
-    auto stream_ptr = std::make_shared<StreamAdaptor>();
-    auto input_dev = DevVectorAsync<float>{stream_ptr, num_elems};
+    auto stream = StreamAdaptor{};
+    auto input_dev = DevVectorAsync<float>{stream, num_elems};
 
     // Allocate memory for the result in the host and device.
     auto output_host = PinnedVec<float>{std::vector<float>(num_elems)};
-    auto output_dev = DevVectorAsync<float>{stream_ptr, num_elems};
+    auto output_dev = DevVectorAsync<float>{stream, num_elems};
 
     auto const exec_params = ExecConfig::getParams(num_elems, sqKernel, 0u);
 
@@ -118,7 +118,7 @@ MilliSeconds seqCopyExecutePinned(unsigned num_elems)
     timer.tic();
 
     HostDevCopy::copyToDevice(input_dev, input_host);
-    sqKernel<<<exec_params.grid_dim, exec_params.block_dim, 0, stream_ptr->getStream()>>>(
+    sqKernel<<<exec_params.grid_dim, exec_params.block_dim, 0, stream.getStream()>>>(
         input_dev.data(), output_dev.data(), num_elems);
     HostDevCopy::copyToHost(output_host, output_dev);
 

@@ -1,7 +1,6 @@
 #ifndef DEV_VECTOR_ASYNC_CUH
 #define DEV_VECTOR_ASYNC_CUH
 
-#include <memory>
 #include "stream_adaptor.cuh"
 #include <iostream>
 
@@ -9,9 +8,9 @@ template<typename T>
 class DevVectorAsync
 {
 public:
-    explicit DevVectorAsync(std::shared_ptr<StreamAdaptor> stream,
+    explicit DevVectorAsync(StreamAdaptor const &stream,
                             unsigned num_elems);
-    explicit DevVectorAsync(std::shared_ptr<StreamAdaptor> stream,
+    explicit DevVectorAsync(StreamAdaptor const &stream,
                             unsigned num_elems, T val);
 
     unsigned size() const noexcept
@@ -29,13 +28,13 @@ public:
 
     ~DevVectorAsync();
 
-    cudaStream_t stream() const
+    cudaStream_t const & stream() const
     {
-        return stream_->getStream();
+        return stream_.getStream();
     }
 
 private:
-    std::shared_ptr<StreamAdaptor> stream_;
+    const StreamAdaptor &stream_;
     unsigned num_elems_;
     T *buff_ = nullptr;
 };
@@ -44,24 +43,25 @@ template<typename T>
 DevVectorAsync<T>::~DevVectorAsync()
 {
     auto const err = cudaFreeAsync(buff_, this->stream());
-    if(err != cudaSuccess) {
+    if (err != cudaSuccess) {
         std::cerr << "Error freeing device buffer: " << cudaGetErrorString(err) << std::endl;
     }
 }
 
 template<typename T>
-DevVectorAsync<T>::DevVectorAsync(std::shared_ptr<StreamAdaptor> stream,
-                                  unsigned int num_elems,
-                                  T val):
-    DevVectorAsync{std::move(stream), num_elems}
+DevVectorAsync<T>::DevVectorAsync(StreamAdaptor const &stream,
+                                  unsigned num_elems,
+                                  T val)
+    :
+    DevVectorAsync{stream, num_elems}
 {
     checkError(cudaMemsetAsync(buff_, val, num_elems_ * sizeof(T), this->stream()),
                "initialization of vector buffer");
 }
 template<typename T>
-DevVectorAsync<T>::DevVectorAsync(std::shared_ptr<StreamAdaptor> stream, unsigned int num_elems)
+DevVectorAsync<T>::DevVectorAsync(StreamAdaptor const &stream, unsigned num_elems)
     :
-    stream_{std::move(stream)},
+    stream_{stream},
     num_elems_{num_elems}
 {
     checkError(cudaMallocAsync(reinterpret_cast<void **>(&buff_), num_elems_ * sizeof(T),
