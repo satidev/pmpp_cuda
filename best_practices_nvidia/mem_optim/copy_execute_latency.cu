@@ -1,8 +1,12 @@
+#include <memory>
 #include "copy_execute_latency.cuh"
 #include "../../utils/dev_timer.cuh"
 #include "../../utils/check_error.cuh"
 #include "../../utils/exec_config.cuh"
 #include "../../utils/stream_adaptor.cuh"
+#include "../../utils/dev_vector_async.cuh"
+#include "../../utils/host_dev_copy.cuh"
+#include "../../utils/pinned_vec.cuh"
 
 namespace BPNV::CopyExecuteLatency
 {
@@ -115,10 +119,9 @@ MilliSeconds seqCopyExecutePinned(unsigned num_elems)
 {
     // Allocate input data in host memory.
     auto constexpr init_val = 2.0f;
-    auto const input_data_host = std::vector<float>(num_elems, init_val);
-    checkError(cudaHostRegister((void *) input_data_host.data(), num_elems * sizeof(float),
-                                cudaHostRegisterDefault),
-               "registering input data host memory");
+    auto input_data_host = PinnedVec<float>{std::vector<float>(num_elems, init_val)};
+
+
 
     // Allocate input data in device memory and transfer the data.
     auto const num_bytes = num_elems * sizeof(float);
@@ -132,10 +135,7 @@ MilliSeconds seqCopyExecutePinned(unsigned num_elems)
                "allocating device memory for output data");
 
     // Allocate the host memory for the result.
-    auto res_host = std::vector<float>(num_elems);
-    checkError(cudaHostRegister((void *) res_host.data(), num_elems * sizeof(float),
-                                cudaHostRegisterDefault),
-               "registering result host memory");
+    auto res_host = PinnedVec<float>{std::vector<float>(num_elems)};
     auto const exec_params = ExecConfig::getParams(num_elems, sqKernel, 0u);
 
     cudaDeviceSynchronize();
@@ -165,12 +165,9 @@ MilliSeconds seqCopyExecutePinned(unsigned num_elems)
     // Clean up.
     cudaFree(input_data_dev);
     cudaFree(output_data_dev);
-    checkError(cudaHostUnregister((void *) input_data_host.data()),
-               "unregistering input data host memory");
-    checkError(cudaHostUnregister((void *) res_host.data()),
-               "unregistering input data host memory");
 
-    if (!Detail::hasSameVal(res_host, init_val * init_val)) {
+
+    if (!Detail::hasSameVal(std::span<float>{res_host.data(), res_host.size()}, init_val * init_val)) {
         std::cerr << "Error: Kernel execution failed\n";
         std::exit(1);
     }
@@ -182,10 +179,7 @@ MilliSeconds stagedConcurrentCopyExecute(unsigned num_elems, unsigned num_stream
 {
     // Allocate input data in host memory.
     auto constexpr init_val = 2.0f;
-    auto const input_data_host = std::vector<float>(num_elems, init_val);
-    checkError(cudaHostRegister((void *) input_data_host.data(), num_elems * sizeof(float),
-                                cudaHostRegisterDefault),
-               "registering input data host memory");
+    auto input_data_host = PinnedVec<float>{std::vector<float>(num_elems, init_val)};
 
     // Allocate input data in device memory and transfer the data.
     auto const num_elem_stream = num_elems / num_streams;
@@ -200,10 +194,7 @@ MilliSeconds stagedConcurrentCopyExecute(unsigned num_elems, unsigned num_stream
                "allocating device memory for output data");
 
     // Allocate the host memory for the result.
-    auto res_host = std::vector<float>(num_elems);
-    checkError(cudaHostRegister((void *) res_host.data(), num_elems * sizeof(float),
-                                cudaHostRegisterDefault),
-               "registering result host memory");
+    auto res_host = PinnedVec<float>{std::vector<float>(num_elems)};
 
     // Allocate streams.
     auto streams = std::vector<StreamAdaptor>(num_streams);
@@ -242,12 +233,8 @@ MilliSeconds stagedConcurrentCopyExecute(unsigned num_elems, unsigned num_stream
     // Clean up.
     cudaFree(input_dat_dev);
     cudaFree(output_data_dev);
-    checkError(cudaHostUnregister((void *) input_data_host.data()),
-               "unregistering input data host memory");
-    checkError(cudaHostUnregister((void *) res_host.data()),
-               "unregistering input data host memory");
 
-    if (!Detail::hasSameVal(res_host, init_val * init_val)) {
+    if (!Detail::hasSameVal(std::span<float>{res_host.data(), res_host.size()}, init_val * init_val)) {
         std::cerr << "Error: Kernel execution failed\n";
         std::exit(1);
     }

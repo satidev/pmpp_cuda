@@ -50,7 +50,7 @@ int main(int argc, char** argv)
             analyzer.plotPerfMetric(output_dir, "Memory bandwidth", "GB/sec");
 
         }
-        else if(action == "copy-kernel_copy"){
+        else if(action == "copy-kernel-copy"){
             using namespace BPNV::CopyExecuteLatency;
             auto const perf_info = runPerfTest(num_repetitions);
             auto const analyzer = PerfTestAnalyzer{perf_info};

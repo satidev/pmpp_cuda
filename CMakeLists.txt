@@ -79,6 +79,8 @@ add_library(cuda_lib
         best_practices_nvidia/mat_transpose/perf_test.cuh
         best_practices_nvidia/mat_transpose/perf_test.cu
         utils/stream_adaptor.cuh
+        utils/dev_vector_async.cuh
+        utils/pinned_vec.cuh
 )
 target_include_directories(cuda_lib PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/external)
 target_link_libraries(cuda_lib cublas)
@@ -109,6 +111,8 @@ add_executable(run_unit_tests main_test.cpp
         pmpp/03_05_06_mat_mul/mat_mul_test.cu
         best_practices_nvidia/mat_transpose/unit_test.cu
         pmpp/02_vec_add/vec_add_test.cu
+        utils/dev_vec_async_unit_test.cu
+        utils/dev_vector_unit_test.cu
 )
 set_target_properties(run_unit_tests PROPERTIES CUDA_SEPARABLE_COMPILATION OFF)
 target_compile_options(run_unit_tests PRIVATE $<$<COMPILE_LANGUAGE:CUDA>:

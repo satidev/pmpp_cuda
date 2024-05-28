@@ -16,7 +16,7 @@ public:
 
     ~StreamAdaptor()
     {
-        checkError(cudaStreamDestroy(stream), "destroying stream");
+        cudaStreamDestroy(stream);
     }
 
     cudaStream_t getStream() const
