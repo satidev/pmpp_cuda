@@ -22,7 +22,7 @@ public:
     {
         return buff_;
     }
-    T *data() const
+    T const *data() const
     {
         return buff_;
     }
