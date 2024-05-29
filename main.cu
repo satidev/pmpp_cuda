@@ -10,7 +10,7 @@ int main(int argc, char** argv)
 {
     try {
         if(argc < 2) {
-            std::cerr << "Usage: ./run_perf_tests -f <operation_name> -n <num_iterations> -o <output_dir>" << std::endl;
+            std::cerr << "Usage: ./run_perf_tests -f <operation_name> -n <num_repetitions> -o <output_dir>" << std::endl;
             return 1;
         }
 
@@ -72,7 +72,7 @@ int main(int argc, char** argv)
         }
         else {
             std::cerr << "Invalid action operation." << std::endl;
-            std::cerr << "Usage: ./run_perf_tests -f <operation_name> -n <num_iterations> -o <output_dir>" << std::endl;
+            std::cerr << "Usage: ./run_perf_tests -a <operation_name> -n <num_iterations> -o <output_dir>" << std::endl;
         }
     }
     catch (std::exception const &e) {
