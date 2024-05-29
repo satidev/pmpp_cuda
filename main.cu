@@ -1,9 +1,9 @@
 #include <iostream>
-#include "best_practices_nvidia/mat_transpose/perf_test.cuh"
+#include "bpnv/mat_transpose/perf_test.cuh"
 #include <dlib/cmd_line_parser.h>
 #include "perf_test_analyzer.h"
-#include "best_practices_nvidia/mem_optim/mem_bandwidth.cuh"
-#include "best_practices_nvidia/mem_optim/copy_execute_latency.cuh"
+#include "bpnv/mem_optim/mem_bandwidth.cuh"
+#include "bpnv/mem_optim/copy_execute_latency.cuh"
 #include "utils/dev_config.cuh"
 
 int main(int argc, char** argv)

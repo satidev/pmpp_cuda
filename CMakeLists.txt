@@ -62,22 +62,22 @@ add_library(cuda_lib
         utils/dev_vector_factory.cuh
         utils/host_dev_copy.cuh
         utils/dlib_utils.cuh
-        best_practices_nvidia/mem_optim/copy_execute_latency.cuh
-        best_practices_nvidia/mem_optim/mem_bandwidth.cuh
-        best_practices_nvidia/mem_optim/mem_bandwidth.cu
-        best_practices_nvidia/mem_optim/copy_execute_latency.cu
-        best_practices_nvidia/mat_transpose/transpose.cuh
-        best_practices_nvidia/mat_transpose/transpose.cu
-        best_practices_nvidia/mat_transpose/trans_impl_strategy.cuh
-        best_practices_nvidia/mat_transpose/trans_impl_naive.cuh
-        best_practices_nvidia/mat_transpose/trans_impl_sm.cuh
-        best_practices_nvidia/mat_transpose/trans_impl_sm_padding.cuh
+        bpnv/mem_optim/copy_execute_latency.cuh
+        bpnv/mem_optim/mem_bandwidth.cuh
+        bpnv/mem_optim/mem_bandwidth.cu
+        bpnv/mem_optim/copy_execute_latency.cu
+        bpnv/mat_transpose/transpose.cuh
+        bpnv/mat_transpose/transpose.cu
+        bpnv/mat_transpose/trans_impl_strategy.cuh
+        bpnv/mat_transpose/trans_impl_naive.cuh
+        bpnv/mat_transpose/trans_impl_sm.cuh
+        bpnv/mat_transpose/trans_impl_sm_padding.cuh
         pmpp/02_vec_add/vec_add_cublas.cuh
         pmpp/02_vec_add/vec_add.cuh
         pmpp/02_vec_add/vec_add.cu
-        best_practices_nvidia/mat_transpose/trans_impl_sm_swizzling.cuh
-        best_practices_nvidia/mat_transpose/perf_test.cuh
-        best_practices_nvidia/mat_transpose/perf_test.cu
+        bpnv/mat_transpose/trans_impl_sm_swizzling.cuh
+        bpnv/mat_transpose/perf_test.cuh
+        bpnv/mat_transpose/perf_test.cu
         utils/stream_adaptor.cuh
         utils/dev_vector_async.cuh
         utils/pinned_vec.cuh
@@ -110,7 +110,7 @@ add_executable(run_unit_tests main_test.cpp
         pmpp/11_scan/cum_sum_host_test.cpp
         pmpp/11_scan/cum_sum_dev_test.cu
         pmpp/03_05_06_mat_mul/mat_mul_test.cu
-        best_practices_nvidia/mat_transpose/unit_test.cu
+        bpnv/mat_transpose/unit_test.cu
         pmpp/02_vec_add/vec_add_test.cu
         utils/dev_vec_async_unit_test.cu
         utils/dev_vector_unit_test.cu
