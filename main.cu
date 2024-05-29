@@ -4,6 +4,7 @@
 #include "perf_test_analyzer.h"
 #include "best_practices_nvidia/mem_optim/mem_bandwidth.cuh"
 #include "best_practices_nvidia/mem_optim/copy_execute_latency.cuh"
+#include "utils/dev_config.cuh"
 
 int main(int argc, char** argv)
 {
@@ -36,8 +37,13 @@ int main(int argc, char** argv)
         if (parser.option("o")) {
             output_dir = parser.option("o").argument();
         }
-
-        if (action == "mat-transpose") {
+        if(action == "know-your-gpu") {
+            auto const& dev_config = DeviceConfigSingleton::getInstance();
+            std::cout << "Number of CUDA devices: " << dev_config.numDevices() << std::endl;
+            std::cout << "Properties for device 0:" << std::endl;
+            dev_config.printDeviceProperties(0);
+        }
+        else if (action == "mat-transpose") {
             auto const perf_info = BPNV::transposePerfTest(num_repetitions);
             auto const analyzer = PerfTestAnalyzer{perf_info};
             analyzer.plotPerfMetric(output_dir, "Kernel execution time", "Milli seconds");

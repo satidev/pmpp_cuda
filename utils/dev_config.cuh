@@ -2,22 +2,34 @@
 #define DEV_CONFIG_CUH
 
 #include <vector>
+#include <string>
 
 struct DeviceProperties
 {
+    // Device info.
     size_t device_id;
+    std::string device_name;
+
+    // Thread resources.
     size_t num_sm;
+    size_t max_threads_per_sm;
+    size_t max_cuncurrent_threads_per_device;
+    size_t max_threads_per_warp;
+    size_t max_threads_per_block;
+    size_t warp_size;
+    size_t max_blocks_per_sm;
+
+    // Memory resources.
     size_t global_mem_size;
     size_t constant_mem_size;
-    size_t max_threads_per_sm;
-    size_t max_threads_per_block;
     size_t max_shared_mem_per_sm;
     size_t max_shared_mem_per_block;
     size_t max_regs_per_block;
     size_t max_regs_per_sm;
-    size_t max_threads_per_warp;
-    size_t max_blocks_per_sm;
-    size_t warp_size;
+    size_t memory_clock_rate;
+    size_t memory_bus_width;
+    float peak_memory_bandwidth;
+    bool can_map_host_memory;
 };
 
 class DeviceConfigSingleton
