@@ -22,6 +22,8 @@ void DeviceConfigSingleton::setDevProperties()
         // Device info.
         dev_prop_struct.device_id = dev_id;
         dev_prop_struct.device_name = dev_prop.name;
+        dev_prop_struct.compute_capability = std::to_string(dev_prop.major) + "." +
+            std::to_string(dev_prop.minor);
 
         // Thread resources.
         dev_prop_struct.num_sm = dev_prop.multiProcessorCount;
@@ -44,7 +46,7 @@ void DeviceConfigSingleton::setDevProperties()
             2.0f * static_cast<float>(dev_prop.memoryClockRate) *
                 (static_cast<float>(dev_prop.memoryBusWidth) / 8.0f) * 1e-6f;
         dev_prop_struct.can_map_host_memory = static_cast<bool>(dev_prop.canMapHostMemory);
-
+        dev_prop_struct.l2_cache_size = dev_prop.l2CacheSize;
         dev_props_.push_back(dev_prop_struct);
     }
 }
@@ -57,6 +59,7 @@ void DeviceConfigSingleton::printDeviceProperties(unsigned dev_id) const
     auto const dev_prop = dev_props_[dev_id];
     std::cout << "Device ID: " << dev_prop.device_id << std::endl;
     std::cout << "Device name: " << dev_prop.device_name << std::endl;
+    std::cout << "Compute capability: " << dev_prop.compute_capability << std::endl;
 
     std::cout << "Number of SMs (streaming multi-processor): " << dev_prop.num_sm << std::endl;
     std::cout << "Maximum concurrent threads per device: "
@@ -94,5 +97,7 @@ void DeviceConfigSingleton::printDeviceProperties(unsigned dev_id) const
     else {
         std::cout << "No" << std::endl;
     }
+    std::cout << "L2 cache size: " << dev_prop.l2_cache_size << " bytes" << std::endl;
+
 }
 

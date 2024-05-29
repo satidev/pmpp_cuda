@@ -9,6 +9,7 @@ struct DeviceProperties
     // Device info.
     size_t device_id;
     std::string device_name;
+    std::string compute_capability;
 
     // Thread resources.
     size_t num_sm;
@@ -30,6 +31,7 @@ struct DeviceProperties
     size_t memory_bus_width;
     float peak_memory_bandwidth;
     bool can_map_host_memory;
+    size_t l2_cache_size;
 };
 
 class DeviceConfigSingleton
