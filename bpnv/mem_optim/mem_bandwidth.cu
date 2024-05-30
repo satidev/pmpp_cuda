@@ -5,65 +5,52 @@
 #include <iostream>
 #include <vector>
 #include "../../utils/perf.cuh"
+#include "../../utils/dev_vector.cuh"
+#include "../../utils/pinned_vector.cuh"
+#include "../../utils/host_dev_copy.cuh"
 
 namespace BPNV::MemoryBandwidth
 {
 float pageableMem(unsigned num_elems, unsigned num_transfers)
 {
-    // Allocate host memory.
     auto const data_host = std::vector<float>(num_elems, 1.0f);
-    auto data_dev = static_cast<float *>(nullptr);
 
     // Allocate pageable device memory.
-    auto const num_bytes = num_elems * sizeof(float);
-    checkError(cudaMalloc(reinterpret_cast<void **>(&data_dev), num_bytes),
-               "allocating pageable device memory");
+    auto data_dev = DevVector<float>{num_elems};
 
     // Copy data to device memory.
     cudaDeviceSynchronize();
     auto timer = DevTimer{};
     timer.tic();
     for (auto i = 0u; i < num_transfers; ++i) {
-        checkError(cudaMemcpy(data_dev, data_host.data(), num_bytes, cudaMemcpyHostToDevice),
-                   "copying data to device");
+        HostDevCopy::copyToDevice(data_dev, data_host);
     }
     cudaDeviceSynchronize();
-    auto const duration = timer.toc();
-    cudaFree(data_dev);
 
-    return computeBandwidth(num_bytes * num_transfers, MilliSeconds{duration});
+    auto const duration = timer.toc();
+    auto const num_bytes = num_elems * sizeof(float) * num_transfers;
+    return computeBandwidth(num_bytes, duration);
 }
 
 float pinnedMem(unsigned num_elems, unsigned num_transfers)
 {
-    // Host data.
-    auto const num_bytes = num_elems * sizeof(float);
-    auto const data_host = std::vector<float>(num_elems, 1.0f);
+    auto const data_host = PinnedVector<float>{std::vector<float>(num_elems, 1.0f)};
 
-    // Register host memory.
-    checkError(cudaHostRegister((void *) (data_host.data()), num_bytes, cudaHostRegisterDefault),
-               "register host memory");
-
-    // Allocate device memory.
-    auto data_dev = static_cast<float *>(nullptr);
-    checkError(cudaMalloc(reinterpret_cast<void **>(&data_dev), num_bytes),
-               "allocating device memory");
+    auto const stream = StreamAdaptor{};
+    auto data_dev = DevVectorAsync<float>{stream, num_elems};
 
     // Copy data to device memory.
     cudaDeviceSynchronize();
     auto timer = DevTimer{};
     timer.tic();
     for (auto i = 0u; i < num_transfers; ++i) {
-        checkError(cudaMemcpyAsync(data_dev, data_host.data(), num_bytes, cudaMemcpyHostToDevice),
-                   "copying data to device");
+        HostDevCopy::copyToDevice(data_dev, data_host);
     }
     cudaDeviceSynchronize();
+
     auto const duration = timer.toc();
-
-    checkError(cudaHostUnregister((void *) data_host.data()), "unregister host memory");
-    cudaFree(data_dev);
-
-    return computeBandwidth(num_bytes * num_transfers, MilliSeconds{duration});
+    auto const num_bytes = num_elems * sizeof(float) * num_transfers;
+    return computeBandwidth(num_bytes, duration);
 }
 
 PerfTestResult runPerfTest(unsigned num_rep)
@@ -72,7 +59,7 @@ PerfTestResult runPerfTest(unsigned num_rep)
 
     auto const num_elems = 1 << 24;
     auto constexpr num_transfers = 10u;
-    std::cout << "Data size: " << num_elems * sizeof(float) << " bytes" << std::endl;
+    std::cout << "Transfer data size: " << num_elems * sizeof(float) << " bytes" << std::endl;
 
     auto perf_info = PerfTestResult{};
     for (auto run_idx = 0u; run_idx < num_rep; ++run_idx) {

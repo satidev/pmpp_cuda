@@ -80,8 +80,8 @@ add_library(cuda_lib
         bpnv/mat_transpose/perf_test.cu
         utils/stream_adaptor.cuh
         utils/dev_vector_async.cuh
-        utils/pinned_vec.cuh
-        utils/mapped_vec.cuh
+        utils/pinned_vector.cuh
+        utils/mapped_vector.cuh
 )
 target_include_directories(cuda_lib PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/external)
 target_link_libraries(cuda_lib cublas)

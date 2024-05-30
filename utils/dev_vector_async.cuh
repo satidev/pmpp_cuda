@@ -13,6 +13,13 @@ public:
     explicit DevVectorAsync(StreamAdaptor const &stream,
                             unsigned num_elems, T val);
 
+    // Due to const ref member stream_ in DevVectorAsync,
+    // we need to delete the following constructors.
+    explicit DevVectorAsync(StreamAdaptor &&stream,
+                            unsigned num_elems) = delete;
+    explicit DevVectorAsync(StreamAdaptor &&stream,
+                            unsigned num_elems, T val) = delete;
+
     unsigned size() const noexcept
     {
         return num_elems_;

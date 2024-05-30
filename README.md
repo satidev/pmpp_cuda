@@ -68,4 +68,8 @@ Memory bandwidth test: end
 As the plot shows, the performance of host-device data transfer
 can be significantly enhanced by using pinned memory.
 
+### Data transfer and kernel execution
+Here we go one step further and analyze the performance of data transfer and kernel execution.
+```
+
 

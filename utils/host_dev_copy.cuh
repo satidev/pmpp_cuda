@@ -4,7 +4,7 @@
 #include <vector>
 #include "dev_vector.cuh"
 #include "dev_vector_async.cuh"
-#include "pinned_vec.cuh"
+#include "pinned_vector.cuh"
 
 namespace HostDevCopy
 {
@@ -12,21 +12,21 @@ template<typename T>
 void copyToDevice(DevVector<T> &dst, std::vector<T> const &src);
 
 template<typename T>
-void copyToDevice(DevVectorAsync<T> &dst, PinnedVec<T> const &src);
+void copyToDevice(DevVectorAsync<T> &dst, PinnedVector<T> const &src);
 
 
 template<typename T>
 void copyToHost(std::vector<T> &dst, DevVector<T> const &src);
 
 template<typename T>
-void copyToHost(PinnedVec<T> &dst, DevVectorAsync<T> const &src);
+void copyToHost(PinnedVector<T> &dst, DevVectorAsync<T> const &src);
 
 template<typename T>
 std::vector<T> hostCopy(DevVector<T> const &src);
 
 
 template<typename T>
-void copyToDevice(DevVectorAsync<T> &dst, PinnedVec<T> const &src)
+void copyToDevice(DevVectorAsync<T> &dst, PinnedVector<T> const &src)
 {
     if(std::size(src) != dst.size())
     {
@@ -38,7 +38,7 @@ void copyToDevice(DevVectorAsync<T> &dst, PinnedVec<T> const &src)
 }
 
 template<typename T>
-void copyToHost(PinnedVec<T> &dst, DevVectorAsync<T> const &src)
+void copyToHost(PinnedVector<T> &dst, DevVectorAsync<T> const &src)
 {
     if(std::size(dst) != src.size())
     {

@@ -1,16 +1,16 @@
-#ifndef PINNED_VEC_CUH
-#define PINNED_VEC_CUH
+#ifndef PINNED_VECTOR_CUH
+#define PINNED_VECTOR_CUH
 
 #include <vector>
 
 template<typename T>
-class PinnedVec
+class PinnedVector
 {
 private:
     std::vector<T> vec_;
 
 public:
-    explicit PinnedVec(std::vector<T> &&vec)
+    explicit PinnedVector(std::vector<T> &&vec)
         :
         vec_{std::move(vec)}
     {
@@ -19,7 +19,7 @@ public:
                                     cudaHostRegisterDefault),
                    "registering pinned memory");
     }
-    ~PinnedVec()
+    ~PinnedVector()
     {
         cudaHostUnregister((void *) vec_.data());
     }
@@ -38,6 +38,6 @@ public:
     }
 };
 
-#endif //PINNED_VEC_CUH
+#endif //PINNED_VECTOR_CUH
 
 

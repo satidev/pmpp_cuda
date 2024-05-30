@@ -1,19 +1,19 @@
-#ifndef MAPPED_VEC_CUH
-#define MAPPED_VEC_CUH
+#ifndef MAPPED_VECTOR_CUH
+#define MAPPED_VECTOR_CUH
 
 #include <vector>
 #include "check_error.cuh"
 #include <stdexcept>
 
 template<typename T>
-class MappedVec
+class MappedVector
 {
 private:
     std::vector<T> vec_;
     T *mapped_ptr_ = nullptr;
 
 public:
-    explicit MappedVec(std::vector<T> &&vec)
+    explicit MappedVector(std::vector<T> &&vec)
         :
         vec_{std::move(vec)}
     {
@@ -32,7 +32,7 @@ public:
                    "getting device pointer for mapped memory");
     }
 
-    ~MappedVec()
+    ~MappedVector()
     {
         cudaHostUnregister((void *) vec_.data());
     }
@@ -59,6 +59,6 @@ public:
     }
 };
 
-#endif //MAPPED_VEC_CUH
+#endif //MAPPED_VECTOR_CUH
 
 

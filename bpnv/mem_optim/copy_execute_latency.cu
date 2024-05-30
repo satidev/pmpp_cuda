@@ -6,8 +6,8 @@
 #include "../../utils/stream_adaptor.cuh"
 #include "../../utils/dev_vector_async.cuh"
 #include "../../utils/host_dev_copy.cuh"
-#include "../../utils/pinned_vec.cuh"
-#include "../../utils/mapped_vec.cuh"
+#include "../../utils/pinned_vector.cuh"
+#include "../../utils/mapped_vector.cuh"
 
 namespace BPNV::CopyExecuteLatency
 {
@@ -101,14 +101,14 @@ MilliSeconds seqCopyExecutePinned(unsigned num_elems)
 {
     // Allocate input data in host pinned memory.
     auto constexpr init_val = 2.0f;
-    auto const input_host = PinnedVec<float>{std::vector<float>(num_elems, init_val)};
+    auto const input_host = PinnedVector<float>{std::vector<float>(num_elems, init_val)};
 
     // Allocate device memory for the input data.
     auto stream = StreamAdaptor{};
     auto input_dev = DevVectorAsync<float>{stream, num_elems};
 
     // Allocate memory for the result in the host and device.
-    auto output_host = PinnedVec<float>{std::vector<float>(num_elems)};
+    auto output_host = PinnedVector<float>{std::vector<float>(num_elems)};
     auto output_dev = DevVectorAsync<float>{stream, num_elems};
 
     auto const exec_params = ExecConfig::getParams(num_elems, sqKernel, 0u);
@@ -140,7 +140,7 @@ MilliSeconds stagedConcurrentCopyExecute(unsigned num_elems, unsigned num_stream
 {
     // Allocate input data in host memory.
     auto constexpr init_val = 2.0f;
-    auto const input_host = PinnedVec<float>{std::vector<float>(num_elems, init_val)};
+    auto const input_host = PinnedVector<float>{std::vector<float>(num_elems, init_val)};
 
     // Allocate input data in device memory and transfer the data.
     auto const num_elem_stream = num_elems / num_streams;
@@ -155,7 +155,7 @@ MilliSeconds stagedConcurrentCopyExecute(unsigned num_elems, unsigned num_stream
                "allocating device memory for output data");
 
     // Allocate the host memory for the result.
-    auto res_host = PinnedVec<float>{std::vector<float>(num_elems)};
+    auto res_host = PinnedVector<float>{std::vector<float>(num_elems)};
 
     // Allocate streams.
     auto streams = std::vector<StreamAdaptor>(num_streams);
@@ -207,8 +207,8 @@ MilliSeconds stagedConcurrentCopyExecute(unsigned num_elems, unsigned num_stream
 MilliSeconds zeroCopyExecute(unsigned num_elems)
 {
     auto constexpr init_val = 2.0f;
-    auto const input_mapped = MappedVec<float>{std::vector<float>(num_elems, init_val)};
-    auto output_mapped = MappedVec<float>{std::vector<float>(num_elems)};
+    auto const input_mapped = MappedVector<float>{std::vector<float>(num_elems, init_val)};
+    auto output_mapped = MappedVector<float>{std::vector<float>(num_elems)};
 
     cudaDeviceSynchronize();
     auto timer = DevTimer{};
