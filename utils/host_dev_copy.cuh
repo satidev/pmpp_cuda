@@ -9,24 +9,24 @@
 namespace HostDevCopy
 {
 template<typename T>
-void copyToDevice(DevVector<T> &dst, std::vector<T> const &src);
+void copyFromHostToDevice(DevVector<T> &dst, std::vector<T> const &src);
 
 template<typename T>
-void copyToDevice(DevVectorAsync<T> &dst, PinnedHostVector<T> const &src);
+void copyFromHostToDevice(DevVectorAsync<T> &dst, PinnedHostVector<T> const &src);
 
 
 template<typename T>
-void copyToHost(std::vector<T> &dst, DevVector<T> const &src);
+void copyFromDeviceToHost(std::vector<T> &dst, DevVector<T> const &src);
 
 template<typename T>
-void copyToHost(PinnedHostVector<T> &dst, DevVectorAsync<T> const &src);
+void copyFromDeviceToHost(PinnedHostVector<T> &dst, DevVectorAsync<T> const &src);
 
 template<typename T>
 std::vector<T> hostCopy(DevVector<T> const &src);
 
 
 template<typename T>
-void copyToDevice(DevVectorAsync<T> &dst, PinnedHostVector<T> const &src)
+void copyFromHostToDevice(DevVectorAsync<T> &dst, PinnedHostVector<T> const &src)
 {
     if(std::size(src) != dst.size())
     {
@@ -38,7 +38,7 @@ void copyToDevice(DevVectorAsync<T> &dst, PinnedHostVector<T> const &src)
 }
 
 template<typename T>
-void copyToHost(PinnedHostVector<T> &dst, DevVectorAsync<T> const &src)
+void copyFromDeviceToHost(PinnedHostVector<T> &dst, DevVectorAsync<T> const &src)
 {
     if(std::size(dst) != src.size())
     {
@@ -51,7 +51,7 @@ void copyToHost(PinnedHostVector<T> &dst, DevVectorAsync<T> const &src)
 
 // copy data from host to device.
 template<typename T>
-void copyToDevice(DevVector<T> &dst, std::vector<T> const &src)
+void copyFromHostToDevice(DevVector<T> &dst, std::vector<T> const &src)
 {
     checkError(cudaMemcpy(dst.data(), src.data(), dst.size() * sizeof(T),
                           cudaMemcpyHostToDevice),
@@ -60,7 +60,7 @@ void copyToDevice(DevVector<T> &dst, std::vector<T> const &src)
 
 // copy data from device to host.
 template<typename T>
-void copyToHost(std::vector<T> &dst, DevVector<T> const &src)
+void copyFromDeviceToHost(std::vector<T> &dst, DevVector<T> const &src)
 {
     checkError(cudaMemcpy(dst.data(), src.data(), src.size() * sizeof(T),
                           cudaMemcpyDeviceToHost),
@@ -71,7 +71,7 @@ template<typename T>
 std::vector<T> hostCopy(DevVector<T> const &src)
 {
     auto dst = std::vector<T>(std::size(src));
-    copyToHost(dst, src);
+    copyFromDeviceToHost(dst, src);
     return dst;
 }
 

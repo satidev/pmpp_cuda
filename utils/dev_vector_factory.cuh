@@ -15,7 +15,7 @@ DevVector<T> create(std::vector<T> const &host)
 {
     auto const num_elems = static_cast<unsigned>(std::size(host));
     auto dev =  DevVector<T>{num_elems};
-    HostDevCopy::copyToDevice(dev, host);
+    HostDevCopy::copyFromHostToDevice(dev, host);
     return dev;
 }
 

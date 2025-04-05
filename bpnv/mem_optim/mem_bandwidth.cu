@@ -24,7 +24,7 @@ namespace BPNV::MemoryBandwidth
         timer.tic();
         for (auto i = 0u; i < num_transfers; ++i)
         {
-            HostDevCopy::copyToDevice(data_dev, data_host);
+            HostDevCopy::copyFromHostToDevice(data_dev, data_host);
         }
         cudaDeviceSynchronize();
 
@@ -47,7 +47,7 @@ namespace BPNV::MemoryBandwidth
         timer.tic();
         for (auto i = 0u; i < num_transfers; ++i)
         {
-            HostDevCopy::copyToDevice(data_dev, data_host);
+            HostDevCopy::copyFromHostToDevice(data_dev, data_host);
         }
         cudaDeviceSynchronize();
 

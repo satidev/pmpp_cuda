@@ -40,10 +40,10 @@ namespace BPNV::CopyExecuteLatency
         auto timer = DevTimer{};
         timer.tic();
 
-        HostDevCopy::copyToDevice(input_dev, input_host);
+        HostDevCopy::copyFromHostToDevice(input_dev, input_host);
         sqKernel<<<exec_params.grid_dim, exec_params.block_dim>>>(
             input_dev.data(), output_dev.data(), num_elems);
-        HostDevCopy::copyToHost(output_host, output_dev);
+        HostDevCopy::copyFromDeviceToHost(output_host, output_dev);
 
         cudaDeviceSynchronize();
         auto const duration = timer.toc();
@@ -122,10 +122,10 @@ namespace BPNV::CopyExecuteLatency
         auto timer = DevTimer{};
         timer.tic();
 
-        HostDevCopy::copyToDevice(input_dev, input_host);
+        HostDevCopy::copyFromHostToDevice(input_dev, input_host);
         sqKernel<<<exec_params.grid_dim, exec_params.block_dim, 0, stream.getStream()>>>(
             input_dev.data(), output_dev.data(), num_elems);
-        HostDevCopy::copyToHost(output_host, output_dev);
+        HostDevCopy::copyFromDeviceToHost(output_host, output_dev);
 
         cudaDeviceSynchronize();
         auto duration = timer.toc();
