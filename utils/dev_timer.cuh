@@ -7,19 +7,18 @@
 class DevTimer
 {
 public:
-    //TODO: Add stream and device info.
     DevTimer();
     ~DevTimer();
 
     // Start the clock.
-    void tic();
+    void tic(cudaStream_t stream = 0);
     // End the clock and return elapsed time.
     MilliSeconds toc();
 
 private:
     cudaEvent_t start_;
     cudaEvent_t stop_;
+    cudaStream_t stream_ = 0;
 };
 
-
-#endif //DEV_TIMER_CUH
+#endif // DEV_TIMER_CUH
