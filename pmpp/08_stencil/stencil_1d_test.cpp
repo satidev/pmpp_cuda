@@ -1,5 +1,5 @@
-#include <gmock/gmock.h>
 #include "stencil_1d.cuh"
+#include <gmock/gmock.h>
 
 TEST(cuda1DDiffTest, throwsExceptionForInputVectorWithOneElement)
 {
@@ -48,6 +48,3 @@ TEST(cuda1DSum3PointTest, correctOutputLargeVector)
     ASSERT_THAT(PMPP::CUDA::sum3Point(ip_vec, false), op_exp);
     ASSERT_THAT(PMPP::CUDA::sum3Point(ip_vec, true), op_exp);
 }
-
-
-

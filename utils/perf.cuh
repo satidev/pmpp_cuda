@@ -18,10 +18,8 @@ using PerfTestResult = std::map<std::string, std::vector<float>>;
 inline float computeBandwidth(size_t num_bytes, MilliSeconds duration)
 {
     auto const num_gb = static_cast<float>(num_bytes) /
-        static_cast<float>(1 << 30);
+                        static_cast<float>(1 << 30);
     return num_gb * 1000.0f / duration.count();
 }
 
-#endif //PERF_CUH
-
-
+#endif // PERF_CUH

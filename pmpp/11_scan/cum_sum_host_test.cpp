@@ -1,5 +1,5 @@
-#include <gmock/gmock.h>
 #include "cum_sum_host.h"
+#include <gmock/gmock.h>
 
 TEST(cumSumHostTest, emptyVecCumSum)
 {
@@ -21,4 +21,3 @@ TEST(cumSumHostTest, multiElemCumSum)
     ASSERT_THAT(PMPP::cumSumHost(std::vector{1.0f, 2.0f, 3.0f, 4.0f}),
                 testing::ElementsAre(1.0f, 3.0f, 6.0f, 10.0f));
 }
-

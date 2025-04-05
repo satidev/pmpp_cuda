@@ -6,9 +6,8 @@
 #include <tuple>
 #include <vector>
 
-
 namespace BPNV
 {
-PerfTestResult transposePerfTest(unsigned num_rep = 10u);
-}// BPNV namespace.
-#endif //PERF_TEST_CUH
+    PerfTestResult transposePerfTest(unsigned num_rep = 10u);
+} // BPNV namespace.
+#endif // PERF_TEST_CUH

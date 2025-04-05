@@ -1,5 +1,5 @@
-#include <gmock/gmock.h>
 #include "histogram.cuh"
+#include <gmock/gmock.h>
 
 using namespace PMPP::CUDA;
 
@@ -48,4 +48,3 @@ TEST(histTest, skewedHistogramLargeVector)
     ASSERT_THAT(histogramPrivateSharedCoarse(data, CoarseningStrategy::INTERLEAVED_PARTITIONING), hist_exp);
     ASSERT_THAT(histogramPrivateSharedCoarseAggr(data), hist_exp);
 }
-

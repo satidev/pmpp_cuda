@@ -1,13 +1,13 @@
-#include <gmock/gmock.h>
 #include "mat_mul.cuh"
 #include "mat_mul_naive.cuh"
 #include "mat_mul_cublas.cuh"
 #include "mat_mul_tiled.cuh"
-#include <iostream>
-#include <memory>
 #include "sq_mat_mul_tiled_static_sm.cuh"
 #include "sq_mat_mul_tiled_dynamic_sm.cuh"
 #include "../../utils/dlib_utils.cuh"
+#include <iostream>
+#include <memory>
+#include <gmock/gmock.h>
 
 using namespace PMPP;
 
@@ -50,7 +50,8 @@ TEST(cudaMatMulTest, squareMatMul)
     mat_mul_vec.push_back(MatMul<float>{std::make_unique<SqMatMulTiledStaticSM<float>>()});
     mat_mul_vec.push_back(MatMul<float>{std::make_unique<SqMatMulTiledDynamicSM<float>>(16u)});
 
-    for (auto const &mat_mul: mat_mul_vec) {
+    for (auto const &mat_mul : mat_mul_vec)
+    {
         auto const res = std::get<0>(mat_mul.run(first, sec));
         ASSERT_THAT(std::vector<float>(res.begin(), res.end()),
                     testing::ContainerEq(std::vector<float>(res_exp.begin(), res_exp.end())));

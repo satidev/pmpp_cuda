@@ -1,13 +1,13 @@
-#include <chrono>
 #include "mem_bandwidth.cuh"
 #include "../../utils/check_error.cuh"
 #include "../../utils/dev_timer.cuh"
-#include <iostream>
-#include <vector>
 #include "../../utils/perf.cuh"
 #include "../../utils/dev_vector.cuh"
 #include "../../utils/pinned_host_vector.cuh"
 #include "../../utils/host_dev_copy.cuh"
+#include <chrono>
+#include <iostream>
+#include <vector>
 
 namespace BPNV::MemoryBandwidth
 {

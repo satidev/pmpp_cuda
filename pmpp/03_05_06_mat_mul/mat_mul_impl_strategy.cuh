@@ -5,19 +5,18 @@
 
 namespace PMPP
 {
-template<typename T>
-class MatMulImplStrategy
-{
-public:
-    virtual ~MatMulImplStrategy() = default;
+    template <typename T>
+    class MatMulImplStrategy
+    {
+    public:
+        virtual ~MatMulImplStrategy() = default;
 
-    virtual void launchKernel(T const *first, T const *sec, T *res,
-                              unsigned num_rows_first,
-                              unsigned num_cols_first,
-                              unsigned num_cols_sec) = 0;
-};
+        virtual void launchKernel(T const *first, T const *sec, T *res,
+                                  unsigned num_rows_first,
+                                  unsigned num_cols_first,
+                                  unsigned num_cols_sec) = 0;
+    };
 
-}// PMPP namespace.
+} // PMPP namespace.
 
-#endif //MAT_MUL_IMPL_STRATEGY_CUH
-
+#endif // MAT_MUL_IMPL_STRATEGY_CUH

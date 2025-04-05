@@ -70,5 +70,4 @@ private:
     void setDevProperties();
 };
 
-
-#endif //DEV_CONFIG_CUH
+#endif // DEV_CONFIG_CUH

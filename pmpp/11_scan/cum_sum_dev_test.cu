@@ -1,7 +1,7 @@
-#include <gmock/gmock.h>
-#include <random>
 #include "cum_sum_host.h"
 #include "cum_sum_dev.cuh"
+#include <gmock/gmock.h>
+#include <random>
 
 TEST(cumSumDevTest, emptyVecCumSum)
 {
@@ -14,5 +14,3 @@ TEST(cumSumDevTest, returnsCorrResultForUniformVec)
     auto const res_exp = PMPP::cumSumHost(data);
     ASSERT_THAT(PMPP::cumSumDev(data), testing::ContainerEq(res_exp));
 }
-
-

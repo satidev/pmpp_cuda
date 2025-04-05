@@ -25,5 +25,4 @@ public:
     }
 };
 
-#endif //STREAM_ADAPTOR_CUH
-
+#endif // STREAM_ADAPTOR_CUH

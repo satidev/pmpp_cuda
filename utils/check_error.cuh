@@ -7,5 +7,4 @@ void checkError(cudaError_t result, std::string const &func_desc);
 // After kernel call.
 void checkErrorKernel(std::string const &kern_desc, bool block = false);
 
-
-#endif //CHECK_ERROR_CUH
+#endif // CHECK_ERROR_CUH

@@ -13,6 +13,6 @@ namespace BPNV::MemoryBandwidth
     float pinnedMem(unsigned num_elems, unsigned num_transfers);
 
     PerfTestResult runPerfTest(unsigned num_rep);
-}// MemoryBandwidth namespace.
+} // MemoryBandwidth namespace.
 
-#endif //MEM_BANDWIDTH_CUH
+#endif // MEM_BANDWIDTH_CUH

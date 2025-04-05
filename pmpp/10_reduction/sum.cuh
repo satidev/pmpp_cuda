@@ -6,7 +6,8 @@
 namespace PMPP::CUDA
 {
     float sumSeq(std::vector<float> const &data);
-    enum class ReductionStrategy {
+    enum class ReductionStrategy
+    {
         NAIVE,
         SIMPLE,
         SIMPLE_MIN_DIV,
@@ -23,7 +24,6 @@ namespace PMPP::CUDA
                                                  ReductionStrategy strategy);
     }
 
-}// Numeric::CUDA namespace.
+} // Numeric::CUDA namespace.
 
-#endif //SUM_CUH
-
+#endif // SUM_CUH

@@ -1,6 +1,6 @@
-#include <gmock/gmock.h>
 #include "stream_adaptor.cuh"
 #include "dev_vector.cuh"
+#include <gmock/gmock.h>
 
 TEST(DevVectorTest, noExceptionThrownDuringConstruction)
 {

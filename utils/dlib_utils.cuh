@@ -5,14 +5,13 @@
 
 namespace DlibUtils
 {
-template<typename T>
-dlib::matrix<T> constMat(int num_rows, int num_cols, T val)
-{
-    auto mat = dlib::matrix<T>(num_rows, num_cols);
-    mat = val;
-    return mat;
-}
-}// DlibUtils namespace.
+    template <typename T>
+    dlib::matrix<T> constMat(int num_rows, int num_cols, T val)
+    {
+        auto mat = dlib::matrix<T>(num_rows, num_cols);
+        mat = val;
+        return mat;
+    }
+} // DlibUtils namespace.
 
-#endif //DLIB_UTILS_CUH
-
+#endif // DLIB_UTILS_CUH

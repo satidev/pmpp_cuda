@@ -1,10 +1,10 @@
 #ifndef DEV_VECTOR_CUH
 #define DEV_VECTOR_CUH
 
-#include <vector>
 #include "check_error.cuh"
+#include <vector>
 
-template<typename T>
+template <typename T>
 class DevVector
 {
 public:
@@ -31,30 +31,26 @@ private:
     T *buff_ = nullptr;
 };
 
-template<typename T>
+template <typename T>
 DevVector<T>::~DevVector()
 {
     cudaFree(buff_);
 }
 
-template<typename T>
+template <typename T>
 DevVector<T>::DevVector(unsigned num_elems, T val)
-    :
-    DevVector{num_elems}
+    : DevVector{num_elems}
 {
     checkError(cudaMemset(buff_, val, num_elems_ * sizeof(T)),
                "initialization of vector buffer");
 }
 
-template<typename T>
+template <typename T>
 DevVector<T>::DevVector(unsigned num_elems)
-    :
-    num_elems_{num_elems}
+    : num_elems_{num_elems}
 {
     checkError(cudaMalloc(reinterpret_cast<void **>(&buff_), num_elems_ * sizeof(T)),
                "allocation of device buffer for vector");
 }
 
-#endif //DEV_VECTOR_CUH
-
-
+#endif // DEV_VECTOR_CUH

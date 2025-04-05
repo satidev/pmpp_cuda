@@ -14,4 +14,4 @@ private:
     std::chrono::time_point<std::chrono::high_resolution_clock> end;
 };
 
-#endif //HOST_TIMER_H
+#endif // HOST_TIMER_H

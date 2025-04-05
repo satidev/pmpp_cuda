@@ -1,4 +1,3 @@
-#include <memory>
 #include "copy_execute_latency.cuh"
 #include "../../utils/dev_timer.cuh"
 #include "../../utils/check_error.cuh"
@@ -8,6 +7,7 @@
 #include "../../utils/host_dev_copy.cuh"
 #include "../../utils/pinned_host_vector.cuh"
 #include "../../utils/mapped_vector.cuh"
+#include <memory>
 
 namespace BPNV::CopyExecuteLatency
 {

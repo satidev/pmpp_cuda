@@ -1,5 +1,5 @@
-#include <gmock/gmock.h>
 #include "conv_1d.cuh"
+#include <gmock/gmock.h>
 
 TEST(conv1DTest, exceptionIsThrownSinceDataSizeIsZero)
 {
@@ -84,7 +84,6 @@ TEST(conv1DTest, correctConv1DResultForNonSymmFilterKernel)
     EXPECT_THAT(PMPP::CUDA::conv1D(data, filter, false, true), ::testing::ContainerEq(expected));
     EXPECT_THAT(PMPP::CUDA::conv1D(data, filter, true, true), ::testing::ContainerEq(expected));
 }
-
 
 TEST(conv1DTest, correctConv1DResultForIdentityKernelLargeArray)
 {

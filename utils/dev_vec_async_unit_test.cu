@@ -1,6 +1,6 @@
-#include <gmock/gmock.h>
 #include "stream_adaptor.cuh"
 #include "dev_vector_async.cuh"
+#include <gmock/gmock.h>
 
 TEST(MallocFreeAsyncTest, noThrowOnAllocDealloc)
 {
@@ -24,5 +24,3 @@ TEST(DevVectorAsyncTest, dataIsNotNullptrAndSizeIsCorrect)
     ASSERT_TRUE(dev_vec.data() != nullptr);
     ASSERT_EQ(dev_vec.size(), 1024u);
 }
-
-

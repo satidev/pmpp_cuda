@@ -1,8 +1,8 @@
 #ifndef COPY_EXECUTE_LATENCY_CUH
 #define COPY_EXECUTE_LATENCY_CUH
 
-#include <span>
 #include "../../utils/perf.cuh"
+#include <span>
 
 // Computes the latency of the memory transfer between the
 // host and the device memory and kernel execution.
@@ -27,12 +27,10 @@ namespace BPNV::CopyExecuteLatency
 
     PerfTestResult stagedCopyNumStreamsTest(unsigned num_rep);
 
-namespace Detail
-{
-bool hasSameVal(std::span<float> vec, float val);
-} // Detail namespace.
-}// CopyExecuteLatency namespace.
+    namespace Detail
+    {
+        bool hasSameVal(std::span<float> vec, float val);
+    } // Detail namespace.
+} // CopyExecuteLatency namespace.
 
-#endif //COPY_EXECUTE_LATENCY_CUH
-
-
+#endif // COPY_EXECUTE_LATENCY_CUH

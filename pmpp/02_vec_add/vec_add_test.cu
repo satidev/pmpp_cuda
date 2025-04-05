@@ -1,7 +1,7 @@
-#include <gmock/gmock.h>
 #include "vec_add.cuh"
 #include "vec_add_naive.cuh"
 #include "vec_add_cublas.cuh"
+#include <gmock/gmock.h>
 
 using namespace PMPP;
 TEST(vecAddTest, throwExcepForDiffSize)
@@ -20,10 +20,9 @@ TEST(vecAddTest, validRes)
     vec.push_back(VectorAdd<float>{std::make_unique<VecAddNaive<float>>()});
     vec.push_back(VectorAdd<float>{std::make_unique<VecAddCublas<float>>()});
 
-    for(auto const &vec_add: vec)
+    for (auto const &vec_add : vec)
     {
         auto const res = std::get<0>(vec_add.run(a, b));
         ASSERT_THAT(res, testing::ElementsAre(2.0f, 4.0f, 6.0f));
     }
 }
-

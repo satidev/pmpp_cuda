@@ -28,4 +28,3 @@ MilliSeconds DevTimer::toc()
                "timer's elapsed time computation");
     return MilliSeconds{elapsed_time_ms};
 }
-

@@ -5,14 +5,12 @@
 
 namespace PMPP
 {
-enum class ScanAlgorithm
-{
-    KOGGE_STONE
-};
-std::vector<float> cumSumDev(std::vector<float> const &vec,
-                             ScanAlgorithm algo = ScanAlgorithm::KOGGE_STONE);
-}// PMPP namespace.
+    enum class ScanAlgorithm
+    {
+        KOGGE_STONE
+    };
+    std::vector<float> cumSumDev(std::vector<float> const &vec,
+                                 ScanAlgorithm algo = ScanAlgorithm::KOGGE_STONE);
+} // PMPP namespace.
 
-
-#endif //CUM_SUM_DEV_CUH
-
+#endif // CUM_SUM_DEV_CUH
